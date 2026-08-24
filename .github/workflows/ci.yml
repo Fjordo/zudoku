@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A new push to the same branch makes the previous run obsolete.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 matches the runtime image, 24 catches breakage early.
+        node: ['22', '24']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+
+      # Builds shared first, which the client and server typecheck against.
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+  image:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Builds the deployment image without pushing, so a broken Dockerfile
+      # fails here instead of during `fly deploy`. The image is discarded with
+      # the runner; only the layer cache below survives, and `mode=min` keeps it
+      # to the final layers instead of the whole node_modules tree.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: false
+          cache-from: type=gha,scope=image
+          cache-to: type=gha,mode=min,scope=image

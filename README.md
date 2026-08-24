@@ -73,6 +73,12 @@ npm start          # serves the built client and the WebSocket API on :8080
 npm run icons      # regenerates the PWA icons
 ```
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and on pull requests: it builds the
+workspaces and runs the whole test suite on Node 22 and 24, and builds the deployment image so a
+broken Dockerfile fails in CI rather than during a deploy.
+
 ## Deploy to Fly.io
 
 ```bash

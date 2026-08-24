@@ -1,7 +1,7 @@
 # Fly.io deployment. One shared-memory process holds the rooms, so keep a single
 # machine (or move room state to Redis before scaling out).
 app = "zudoku"
-primary_region = "cgd"
+primary_region = "cdg"
 
 [build]
   dockerfile = "Dockerfile"
