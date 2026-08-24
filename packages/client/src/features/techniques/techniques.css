@@ -1,0 +1,102 @@
+/* Technique cards and their illustrative mini boards. */
+
+.technique {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.technique__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+.technique__title {
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.technique__body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.technique__body .bullets {
+  flex: 1 1 260px;
+}
+
+.mini {
+  margin: 0;
+  flex: 0 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mini__grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  aspect-ratio: 1;
+  gap: 1px;
+  padding: 2px;
+  background: var(--line);
+  border: 2px solid var(--surface-strong);
+  border-radius: var(--radius-sm);
+}
+
+.mini__cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 0.7rem;
+}
+
+.mini__cell--edge-right {
+  box-shadow: 1px 0 0 var(--surface-strong);
+}
+
+.mini__cell--edge-bottom {
+  box-shadow: 0 1px 0 var(--surface-strong);
+}
+
+.mini__cell--pattern {
+  background: color-mix(in srgb, var(--accent) 32%, var(--bg-elevated));
+}
+
+.mini__cell--target {
+  background: color-mix(in srgb, var(--danger) 28%, var(--bg-elevated));
+}
+
+.mini__digit {
+  font-weight: 650;
+}
+
+.mini__notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  font-size: 0.34rem;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.mini__notes > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

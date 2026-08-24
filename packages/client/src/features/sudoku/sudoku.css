@@ -1,0 +1,394 @@
+/* Board, number pad and controls. Sized to fit a phone screen without scrolling. */
+
+.game__layout {
+  display: flex;
+  gap: var(--space-5);
+  align-items: flex-start;
+}
+
+.game__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.game__aside {
+  flex: 0 0 260px;
+}
+
+.game__input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (max-width: 860px) {
+  .game__layout {
+    flex-direction: column;
+    /* Column layout: stretch keeps the board full width instead of shrink-to-fit. */
+    align-items: stretch;
+  }
+
+  .game__aside {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  /* Phones: keep the keypad reachable with a thumb while the page scrolls. */
+  .game__input {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    padding: var(--space-2) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, transparent 0%, var(--bg) 22%);
+  }
+}
+
+/* --- stats --- */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.stat--warn .stat__value {
+  color: var(--warning);
+}
+
+.stat__label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.stat__value {
+  font-weight: 650;
+}
+
+/* --- hint --- */
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated));
+}
+
+.hint__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+.hint__tag {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hint__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.hint__actions .button {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+}
+
+/* --- board --- */
+
+/*
+ * The board is capped by the space left after the header, stats, keypad and
+ * controls, so a phone shows the whole game without scrolling.
+ */
+.board__frame {
+  position: relative;
+  width: min(100%, 68vh, calc(100dvh - 300px));
+  margin: 0 auto;
+}
+
+@media (min-width: 861px) {
+  .board__frame {
+    width: min(100%, 68vh);
+  }
+}
+
+.board {
+  display: grid;
+  /* Digits scale with the board itself, not the viewport, so every layout fits. */
+  container-type: inline-size;
+  /* Long presses must not start a text selection on the grid. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  grid-template-columns: repeat(9, 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  gap: 1px;
+  padding: 3px;
+  background: var(--line);
+  border: 2px solid var(--box-line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: var(--bg-elevated);
+  color: var(--accent);
+  font-size: 5.6cqw;
+  font-weight: 600;
+  transition: background 90ms ease;
+}
+
+.cell--edge-right {
+  box-shadow: 2px 0 0 var(--box-line);
+  z-index: 1;
+}
+
+.cell--edge-bottom {
+  box-shadow: 0 2px 0 var(--box-line);
+  z-index: 1;
+}
+
+.cell--edge-right.cell--edge-bottom {
+  box-shadow: 2px 0 0 var(--box-line), 0 2px 0 var(--box-line);
+}
+
+.cell--given {
+  color: var(--text);
+}
+
+.cell--hinted {
+  color: var(--success);
+}
+
+.cell--related {
+  background: #202a3f;
+}
+
+/* Rows, columns and boxes holding the highlighted digit. */
+.cell--online {
+  background: #24304a;
+}
+
+.cell--matched {
+  background: color-mix(in srgb, var(--accent) 30%, var(--bg-elevated));
+  color: #ffffff;
+}
+
+.cell--explained {
+  outline: 2px solid var(--warning);
+  outline-offset: -2px;
+  z-index: 2;
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--warning);
+  outline-offset: -2px;
+  z-index: 3;
+}
+
+.cell--selected {
+  background: color-mix(in srgb, var(--accent) 45%, var(--bg-elevated));
+  color: #ffffff;
+}
+
+.cell--wrong {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 22%, var(--bg-elevated));
+}
+
+.cell__value {
+  line-height: 1;
+}
+
+.cell__notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  font-size: 2cqw;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.cell__note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* --- number pad --- */
+
+.pad {
+  display: grid;
+  user-select: none;
+  -webkit-user-select: none;
+  grid-template-columns: repeat(9, 1fr);
+  gap: var(--space-1);
+}
+
+.pad__key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-height: 54px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--accent);
+}
+
+.pad__key[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 26%, var(--surface));
+  color: #ffffff;
+}
+
+.pad__key--done {
+  color: var(--text-muted);
+}
+
+.pad__digit {
+  font-size: clamp(1.05rem, 4.6vw, 1.45rem);
+  font-weight: 650;
+  line-height: 1;
+}
+
+.pad__count {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+
+/* --- controls --- */
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+.controls__button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.controls__button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+}
+
+.controls__button:disabled {
+  opacity: 0.45;
+}
+
+/* --- result overlay --- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  text-align: center;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.overlay__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* Landscape phones: board on the left, input on the right, nothing scrolls. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .page.game {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .game .topbar {
+    min-height: 36px;
+  }
+
+  .game .stat {
+    padding: 2px var(--space-2);
+    font-size: 0.8rem;
+  }
+
+  .game .stat__label {
+    font-size: 0.62rem;
+  }
+
+  .game__main {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .board__frame {
+    width: min(48vw, calc(100dvh - 150px));
+    margin: 0;
+  }
+
+  .game__input {
+    position: static;
+    flex: 1 1 auto;
+    padding: 0;
+    background: none;
+  }
+
+  .pad {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

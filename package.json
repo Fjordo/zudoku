@@ -1,0 +1,28 @@
+{
+  "name": "zudoku",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Sudoku web app with solo and multiplayer challenge modes",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/client"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build -w @zudoku/shared && npm run build -w @zudoku/client && npm run build -w @zudoku/server",
+    "start": "node packages/server/dist/index.js",
+    "test": "npm run test -ws --if-present",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "lint": "npm run typecheck",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

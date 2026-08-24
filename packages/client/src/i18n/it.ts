@@ -1,0 +1,251 @@
+import type { Dictionary } from './en';
+
+/** Italian dictionary. Keys mirror `en`; the parity test guards against drift. */
+export const it: Dictionary = {
+  'common.back': '← Indietro',
+  'common.home': 'Home',
+  'common.close': 'Chiudi',
+  'common.retry': 'Riprova',
+  'common.you': 'tu',
+  'common.language': 'Lingua',
+
+  'home.tagline': 'Puzzle in solitaria, o una gara con gli amici sulla stessa griglia.',
+  'home.solo': 'Solitario',
+  'home.difficulty': 'Difficoltà',
+  'home.soloMeta': '{hints} aiuti · {mistakes} errori consentiti · a tempo',
+  'home.play': 'Gioca',
+  'home.resume': 'Riprendi partita',
+  'home.challenge': 'Sfida',
+  'home.challengeDesc':
+    'Crea una stanza, condividi il codice: la stessa partita parte per tutti insieme. Vince chi finisce per primo.',
+  'home.challengeCta': 'Crea o entra in una stanza',
+  'home.techniques': 'Regole e tecniche avanzate',
+
+  'difficulty.easy': 'Facile',
+  'difficulty.medium': 'Medio',
+  'difficulty.hard': 'Difficile',
+
+  'game.solo': 'Solitario',
+  'game.room': 'Stanza {code}',
+  'game.badgeNotes': 'Note',
+  'game.badgeDigits': 'Numeri',
+  'game.statDifficulty': 'Difficoltà',
+  'game.statTime': 'Tempo',
+  'game.statMistakes': 'Errori',
+  'game.statFilled': 'Riempite',
+  'game.undo': 'Annulla',
+  'game.erase': 'Cancella',
+  'game.notesOn': 'Note attive',
+  'game.notesOff': 'Note spente',
+  'game.hint': 'Aiuto · {count}',
+  'game.pause': 'Pausa',
+  'game.resume': 'Riprendi',
+  'game.paused': 'In pausa',
+  'game.newPuzzle': 'Nuovo schema',
+  'game.newGame': 'Nuova partita',
+  'game.keyboardHelp':
+    'Tastiera: 1-9 per inserire, N per le note, H per un aiuto, frecce per muoverti, backspace per cancellare.',
+  'game.solved': 'Risolto!',
+  'game.solvedDetail': 'Completato in {time} con {mistakes} errori.',
+  'game.lost': 'Vite esaurite',
+  'game.lostDetail': 'Tre errori chiudono la partita. Prova un altro schema.',
+  'game.loading': 'Sto creando uno schema {difficulty}…',
+  'game.loadingDetail':
+    'Ogni schema viene verificato a soluzione unica e classificato in base alle tecniche necessarie per risolverlo.',
+  'game.generateError': 'Non è stato possibile creare lo schema. Riprova.',
+  'game.boardLabel': 'Griglia del sudoku',
+  'game.digitsLabel': 'Numeri',
+  'game.actionsLabel': 'Azioni sulla griglia',
+  'game.digitLabel': 'Numero {digit}',
+  'game.cellLabel': 'Riga {row} colonna {column}, {value}',
+  'game.cellEmpty': 'vuota',
+  'game.hintLearn': 'Approfondisci',
+  'game.hintDismiss': 'Chiudi il suggerimento',
+
+  'unit.row': 'riga {position}',
+  'unit.column': 'colonna {position}',
+  'unit.box': 'riquadro {position}',
+
+  'hint.none': 'Nessun altro passaggio logico disponibile.',
+  'hint.wrong': 'In {cell} non può esserci {digit}. Cancellalo prima di proseguire.',
+  'hint.naked_single': 'In {cell} resta un solo candidato: {digit}.',
+  'hint.hidden_single': 'Il {digit} può stare solo in {cell} nella {unit}.',
+  'hint.naked_pair': '{cells} nella {unit} contengono solo {digits}: quei numeri escono dal resto dell’unità.',
+  'hint.naked_triple': '{cells} nella {unit} contengono solo {digits}: quei numeri escono dal resto dell’unità.',
+  'hint.hidden_pair': '{digits} stanno solo in {cells} della {unit}: lì non può esserci altro.',
+  'hint.pointing_pair': 'Nel {unit} il {digit} sta solo su {cells}: esce dal resto di quella linea.',
+  'hint.box_line_reduction': 'Nella {unit} il {digit} sta solo in {cells}: esce dal resto di quel riquadro.',
+  'hint.x_wing': 'Il {digit} forma un X-Wing su {cells}: esce dalle linee incrociate.',
+  'hint.swordfish': 'Il {digit} forma uno Swordfish su {cells}: esce dalle linee incrociate.',
+  'hint.xy_wing': 'XY-Wing su {cells}: il {digit} esce da ogni cella vista da entrambe le pinze.',
+
+  'technique.naked_single': 'Singolo nudo',
+  'technique.hidden_single': 'Singolo nascosto',
+  'technique.naked_pair': 'Coppia nuda',
+  'technique.hidden_pair': 'Coppia nascosta',
+  'technique.naked_triple': 'Tripla nuda',
+  'technique.pointing_pair': 'Coppia puntata',
+  'technique.box_line_reduction': 'Riduzione riquadro/linea',
+  'technique.x_wing': 'X-Wing',
+  'technique.xy_wing': 'XY-Wing',
+  'technique.swordfish': 'Swordfish',
+
+  'challenge.title': 'Sfida',
+  'challenge.connectionOpen': 'connesso',
+  'challenge.connectionConnecting': 'connessione…',
+  'challenge.connectionClosed': 'riconnessione…',
+  'challenge.connectionIdle': 'offline',
+  'challenge.yourName': 'Il tuo nome',
+  'challenge.namePlaceholder': 'Ada',
+  'challenge.createTitle': 'Crea una stanza',
+  'challenge.createCta': 'Crea stanza',
+  'challenge.joinTitle': 'Entra con un codice',
+  'challenge.inviteCode': 'Codice d’invito',
+  'challenge.joinCta': 'Entra nella stanza',
+  'challenge.players': 'Giocatori ({count})',
+  'challenge.host': 'host',
+  'challenge.offline': 'offline',
+  'challenge.ready': 'pronto',
+  'challenge.waiting': 'in attesa',
+  'challenge.imReady': 'Sono pronto',
+  'challenge.imNotReady': 'Non sono pronto',
+  'challenge.start': 'Avvia la gara',
+  'challenge.shareHint': 'Condividi il codice: la gara parte per tutti nello stesso momento.',
+  'challenge.someNotReady': 'Alcuni giocatori non sono ancora pronti.',
+  'challenge.hostStarts': 'Difficoltà: {difficulty}. L’host avvia la gara.',
+  'challenge.leave': 'Esci dalla stanza',
+  'challenge.copyCode': 'Copia codice',
+  'challenge.copyLink': 'Copia link',
+  'challenge.copied': 'Copiato',
+  'challenge.share': 'Condividi',
+  'challenge.shareTitle': 'Sfida Zudoku',
+  'challenge.shareText': 'Unisciti alla mia gara di sudoku: {code}',
+  'challenge.standings': 'Classifica',
+  'challenge.winner': 'vincitore',
+  'challenge.out': 'fuori',
+  'challenge.progress': '{filled}/81 · {mistakes} ✗',
+  'challenge.rank': '#{rank} · {time}',
+  'challenge.resultWin': 'Hai vinto!',
+  'challenge.resultOut': 'Vite esaurite',
+  'challenge.resultFinished': 'Completato',
+  'challenge.resultTime': 'Il tuo tempo: {time} (#{rank}).',
+  'challenge.resultEliminated': 'Tre errori hanno chiuso la tua gara.',
+  'challenge.resultWinner': 'Ha vinto {name}.',
+  'challenge.resultWaiting': 'In attesa degli altri giocatori…',
+  'challenge.rematch': 'Rivincita',
+  'challenge.rematchHost': 'L’host può avviare la rivincita.',
+
+  'error.room_not_found': 'Questo codice stanza non esiste.',
+  'error.room_full': 'La stanza è piena.',
+  'error.room_in_progress': 'La partita è già iniziata.',
+  'error.not_host': 'Solo l’host può farlo.',
+  'error.invalid_message': 'Il server ha rifiutato la richiesta.',
+  'error.invalid_name': 'Scegli un nome.',
+  'error.not_in_room': 'Entra prima in una stanza.',
+  'error.invalid_solution': 'Questa griglia non è una soluzione valida.',
+  'error.rate_limited': 'Troppe azioni, rallenta un attimo.',
+
+  'techniques.title': 'Regole e tecniche avanzate',
+  'techniques.rulesTitle': 'Le regole',
+  'techniques.intro':
+    'Il solutore che genera gli aiuti usa esattamente queste tecniche, in questo ordine, e la difficoltà è determinata dalla più complessa richiesta dallo schema.',
+  'techniques.rules': [
+    'Riempi la griglia 9x9 in modo che ogni riga, ogni colonna e ogni riquadro 3x3 contenga i numeri da 1 a 9 una sola volta.',
+    'Uno schema valido ha una sola soluzione e non richiede mai di tirare a indovinare: ogni numero si deduce.',
+    'Le note (matite) registrano i candidati di una cella. Tenerle aggiornate è ciò che rende visibili le tecniche qui sotto.',
+    'In questa app tre numeri sbagliati chiudono la partita: meglio una deduzione che sai giustificare.',
+  ],
+  'level.basic': 'Base',
+  'level.intermediate': 'Intermedio',
+  'level.advanced': 'Avanzato',
+
+  'guide.naked_single.summary':
+    'Una cella la cui riga, colonna e riquadro hanno già usato gli altri otto numeri.',
+  'guide.naked_single.steps': [
+    'Scegli una cella vuota ed elenca i numeri mancanti nella sua riga, colonna e riquadro.',
+    'Se ne resta esattamente uno, scrivilo.',
+    'Togli quel numero dalle note di tutte le celle che ora lo vedono.',
+  ],
+  'guide.naked_single.caption': 'In R5C5 resta un solo candidato: ci va il 7.',
+
+  'guide.hidden_single.summary':
+    'Un numero che entra in una sola cella di riga, colonna o riquadro, anche se quella cella ha altri candidati.',
+  'guide.hidden_single.steps': [
+    'Prendi un’unità e un numero che le manca ancora.',
+    'Escludi le celle in cui quel numero non può andare.',
+    'Se ne resta una sola, il numero va lì a prescindere dagli altri candidati.',
+  ],
+  'guide.hidden_single.caption': 'Solo R1C5 può ancora ospitare il 7 nella riga 1.',
+
+  'guide.naked_pair.summary':
+    'Due celle della stessa unità con gli stessi due candidati: quei numeri appartengono alla coppia.',
+  'guide.naked_pair.steps': [
+    'Cerca due celle nella stessa unità con la stessa coppia di candidati.',
+    'In qualsiasi ordine, la coppia consuma entrambi i numeri.',
+    'Togli entrambi i numeri da tutte le altre celle dell’unità.',
+  ],
+  'guide.naked_pair.caption': '4 e 5 sono bloccati in R3C1/R3C2: escono dal resto della riga 3.',
+
+  'guide.hidden_pair.summary':
+    'Due numeri che entrano solo in due celle di un’unità: quelle celle non contengono altro.',
+  'guide.hidden_pair.steps': [
+    'In un’unità, trova due numeri i cui candidati stanno nelle stesse due celle.',
+    'Quelle due celle devono ospitare quei due numeri.',
+    'Cancella ogni altro candidato dalla coppia di celle.',
+  ],
+  'guide.hidden_pair.caption': '1 e 2 stanno solo in R6C1/R6C2: 6, 7 e 8 escono da quelle celle.',
+
+  'guide.naked_triple.summary':
+    'Tre celle di un’unità che si dividono tre candidati, in qualsiasi combinazione.',
+  'guide.naked_triple.steps': [
+    'Trova tre celle i cui candidati formano insieme esattamente tre numeri.',
+    'Ogni cella può averne due o tre: il trio li consuma comunque tutti.',
+    'Togli quei numeri dal resto dell’unità.',
+  ],
+  'guide.naked_triple.caption': '2, 6 e 9 occupano le prime tre celle: in R8C6 resta solo il 4.',
+
+  'guide.pointing_pair.summary':
+    'In un riquadro, un numero che sta solo su una riga o colonna: esce dal resto di quella linea.',
+  'guide.pointing_pair.steps': [
+    'Prendi un riquadro e un numero che gli manca.',
+    'Verifica se tutte le celle candidate per quel numero stanno sulla stessa riga o colonna.',
+    'In tal caso togli il numero da quella linea fuori dal riquadro.',
+  ],
+  'guide.pointing_pair.caption': 'Il riquadro 1 tiene il 7 sulla riga 1: la riga perde gli altri 7.',
+
+  'guide.box_line_reduction.summary':
+    'Lo specchio della coppia puntata: un numero confinato in un riquadro dentro una linea esce dal resto del riquadro.',
+  'guide.box_line_reduction.steps': [
+    'Prendi una riga o colonna e un numero che le manca.',
+    'Verifica se tutte le sue celle candidate cadono in un solo riquadro.',
+    'In tal caso togli il numero dalle altre celle di quel riquadro.',
+  ],
+  'guide.box_line_reduction.caption': 'La riga 1 piazza il 7 solo nel riquadro 1: il riquadro perde gli altri 7.',
+
+  'guide.x_wing.summary':
+    'Un numero limitato alle stesse due colonne su due righe (o alle stesse due righe su due colonne).',
+  'guide.x_wing.steps': [
+    'Scegli un numero e trova due righe in cui ha esattamente due celle candidate.',
+    'Verifica che entrambe le righe usino la stessa coppia di colonne.',
+    'Comunque si risolva il rettangolo, quelle colonne sono servite: togli il numero dal resto delle due colonne.',
+  ],
+  'guide.x_wing.caption': 'I quattro angoli bloccano il 4 nelle colonne 3 e 7: gli altri 4 lì escono.',
+
+  'guide.xy_wing.summary':
+    'Un perno con candidati XY e due pinze XZ e YZ che vede: Z esce dalle celle viste da entrambe le pinze.',
+  'guide.xy_wing.steps': [
+    'Trova una cella con esattamente due candidati, X e Y (il perno).',
+    'Trova due celle che il perno vede, con candidati XZ e YZ (le pinze).',
+    'Qualunque valore prenda il perno, una pinza diventa Z: togli Z da ogni cella vista da entrambe.',
+  ],
+  'guide.xy_wing.caption': 'Il perno R2C2 (1/2) forza un 3 in una pinza: R6C6 perde il 3.',
+
+  'guide.swordfish.summary':
+    'Un X-Wing di taglia superiore: un numero distribuito su tre righe che usano solo tre colonne.',
+  'guide.swordfish.steps': [
+    'Scegli un numero e trova tre righe in cui ha due o tre celle candidate.',
+    'Verifica che tutte quelle celle stiano nelle stesse tre colonne.',
+    'Togli il numero da quelle colonne fuori dalle tre righe (e viceversa per la versione a colonne).',
+  ],
+  'guide.swordfish.caption': 'Le righe 1, 4 e 7 confinano il 5 nelle colonne 1-3: altrove lì il 5 esce.',
+};
