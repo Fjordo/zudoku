@@ -38,8 +38,10 @@ export function TechniquesPage({ navigate }: TechniquesPageProps) {
       <p className="small muted">{t('techniques.intro')}</p>
 
       {TECHNIQUE_LEVELS.map((level) => (
-        <section key={level} className="stack">
-          <h2 className="section-title">{t(`level.${level}` as MessageKey)}</h2>
+        <section key={level} className={`techniques__band techniques__band--${level}`}>
+          <div className="techniques__heading">
+            <h2 className="section-title">{t(`level.${level}` as MessageKey)}</h2>
+          </div>
           {TECHNIQUE_GUIDE.filter((entry) => entry.level === level).map((entry) => {
             const expanded = open === entry.id;
             return (
@@ -51,7 +53,9 @@ export function TechniquesPage({ navigate }: TechniquesPageProps) {
                   onClick={() => setOpen(expanded ? null : entry.id)}
                 >
                   <span className="technique__title">{t(`technique.${entry.id}` as MessageKey)}</span>
-                  <span aria-hidden="true">{expanded ? '−' : '+'}</span>
+                  <span className="technique__toggle" aria-hidden="true">
+                    {expanded ? '−' : '+'}
+                  </span>
                 </button>
                 <p className="small muted">{t(`guide.${entry.id}.summary` as MessageKey)}</p>
                 {expanded && (

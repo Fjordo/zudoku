@@ -1,5 +1,37 @@
 /* Technique cards and their illustrative mini boards. */
 
+/* The band a technique belongs to is real information, so it carries the accent. */
+.techniques__band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.techniques__band--basic {
+  --accent: var(--bone);
+}
+
+.techniques__band--intermediate {
+  --accent: var(--beam);
+}
+
+.techniques__band--advanced {
+  --accent: var(--flare);
+}
+
+.techniques__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.techniques__heading::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 60%, transparent), transparent);
+}
+
 .technique {
   display: flex;
   flex-direction: column;
@@ -19,8 +51,15 @@
 }
 
 .technique__title {
-  font-size: 1rem;
-  font-weight: 650;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--bone);
+}
+
+.technique__toggle {
+  font-family: var(--font-mono);
+  color: color-mix(in srgb, var(--accent) 80%, var(--bone));
 }
 
 .technique__body {
@@ -28,7 +67,7 @@
   flex-wrap: wrap;
   gap: var(--space-4);
   align-items: flex-start;
-  padding-top: var(--space-2);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--line);
 }
 
@@ -38,7 +77,7 @@
 
 .mini {
   margin: 0;
-  flex: 0 1 260px;
+  flex: 0 1 250px;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -47,11 +86,12 @@
 .mini__grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
+  container-type: inline-size;
   aspect-ratio: 1;
   gap: 1px;
   padding: 2px;
   background: var(--line);
-  border: 2px solid var(--surface-strong);
+  border: 1px solid var(--box-line);
   border-radius: var(--radius-sm);
 }
 
@@ -60,29 +100,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-elevated);
-  color: var(--text);
-  font-size: 0.7rem;
+  background: var(--plate);
+  color: var(--bone);
+  font-family: var(--font-mono);
+  font-size: 5cqw;
 }
 
 .mini__cell--edge-right {
-  box-shadow: 1px 0 0 var(--surface-strong);
+  box-shadow: 1px 0 0 var(--box-line);
 }
 
 .mini__cell--edge-bottom {
-  box-shadow: 0 1px 0 var(--surface-strong);
+  box-shadow: 0 1px 0 var(--box-line);
 }
 
+/* Pattern cells are lit; the cells the technique acts on are marked in magenta. */
 .mini__cell--pattern {
-  background: color-mix(in srgb, var(--accent) 32%, var(--bg-elevated));
+  background: color-mix(in srgb, var(--beam) 30%, var(--plate));
+  color: var(--bone);
 }
 
 .mini__cell--target {
-  background: color-mix(in srgb, var(--danger) 28%, var(--bg-elevated));
+  background: color-mix(in srgb, var(--flare) 26%, var(--plate));
 }
 
 .mini__digit {
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .mini__notes {
@@ -90,9 +133,14 @@
   grid-template-columns: repeat(3, 1fr);
   width: 100%;
   height: 100%;
-  font-size: 0.34rem;
+  font-size: 2.4cqw;
   line-height: 1;
   color: var(--text-muted);
+}
+
+.mini__cell--pattern .mini__notes,
+.mini__cell--target .mini__notes {
+  color: var(--bone);
 }
 
 .mini__notes > span {

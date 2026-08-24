@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { MAX_MISTAKES, type Difficulty } from '@zudoku/shared';
 import { useI18n } from '../../../i18n';
 import type { MessageKey } from '../../../i18n/en';
@@ -19,9 +20,7 @@ export function GameStats({ difficulty, elapsedMs, mistakes, progress }: GameSta
       <Stat label={t('game.statTime')} value={formatDuration(elapsedMs)} mono />
       <Stat
         label={t('game.statMistakes')}
-        value={`${mistakes}/${MAX_MISTAKES}`}
-        tone={mistakes > 0 ? 'warn' : undefined}
-        live
+        value={<Lives spent={mistakes} label={`${mistakes}/${MAX_MISTAKES}`} />}
       />
       <Stat label={t('game.statFilled')} value={`${progress}/81`} mono />
     </div>
@@ -30,20 +29,29 @@ export function GameStats({ difficulty, elapsedMs, mistakes, progress }: GameSta
 
 interface StatProps {
   label: string;
-  value: string;
+  value: ReactNode;
   mono?: boolean;
-  tone?: 'warn';
-  /** Announces changes to screen readers, used for the mistake counter. */
-  live?: boolean;
 }
 
-function Stat({ label, value, mono, tone, live }: StatProps) {
+function Stat({ label, value, mono }: StatProps) {
   return (
-    <div className={tone === 'warn' ? 'stat stat--warn' : 'stat'}>
+    <div className="stat">
       <span className="stat__label">{label}</span>
-      <span className={mono ? 'stat__value tabular' : 'stat__value'} aria-live={live ? 'polite' : undefined}>
-        {value}
-      </span>
+      <span className={mono ? 'stat__value tabular' : 'stat__value'}>{value}</span>
     </div>
+  );
+}
+
+/** Remaining lives as lamps: three lit, one goes out per mistake. */
+function Lives({ spent, label }: { spent: number; label: string }) {
+  return (
+    <span className="lives" role="img" aria-label={label} aria-live="polite">
+      {Array.from({ length: MAX_MISTAKES }, (_, index) => (
+        <span
+          key={index}
+          className={index < MAX_MISTAKES - spent ? 'lives__pip' : 'lives__pip lives__pip--spent'}
+        />
+      ))}
+    </span>
   );
 }

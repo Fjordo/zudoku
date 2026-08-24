@@ -1,7 +1,7 @@
 {
   "name": "zudoku",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Sudoku web app with solo and multiplayer challenge modes",
   "type": "module",
   "engines": {

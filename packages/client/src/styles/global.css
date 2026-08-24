@@ -1,24 +1,33 @@
-/* Design tokens and shared primitives. Component styles live next to features. */
+/*
+ * Theme: a dark plate lit by the digit you are working on.
+ * Colour carries meaning here — bone for the printed clues, amber for what you
+ * wrote, aqua for light (highlight and hints), magenta for mistakes and for the
+ * challenge mode. Nothing is tinted for decoration.
+ */
 :root {
-  --bg: #0f1420;
-  --bg-elevated: #171e2e;
-  --surface: #1d2537;
-  --surface-strong: #26314a;
-  --line: #2c3852;
-  /* Separator between 3x3 boxes; brighter than the cell grid on purpose. */
-  --box-line: #56688f;
-  --text: #e8ecf6;
-  --text-muted: #93a0bd;
-  --accent: #6ea8fe;
-  --accent-strong: #3b82f6;
-  --success: #4ade80;
-  --danger: #f87171;
-  --warning: #fbbf24;
+  --ink: #12101c;
+  --plate: #191527;
+  --surface: #201b33;
+  --surface-lift: #2a2440;
+  --line: #322b4d;
+  --box-line: #4f4479;
+
+  --bone: #f2ecdf;
+  --text: #ece7f7;
+  --text-muted: #a9a2c6;
+
+  --beam: #5fe3d0;
+  --lamp: #ffb43f;
+  --flare: #ff5d8f;
+
+  /* Accent of the current surface; sections override it to state their mode. */
+  --accent: var(--beam);
 
   --radius-sm: 8px;
   --radius: 14px;
-  --radius-lg: 22px;
-  --shadow: 0 18px 40px rgb(0 0 0 / 35%);
+  --radius-lg: 20px;
+  --shadow: 0 20px 44px rgb(6 4 14 / 55%);
+  --glow: 0 0 18px color-mix(in srgb, var(--accent) 32%, transparent);
 
   --space-1: 4px;
   --space-2: 8px;
@@ -27,7 +36,9 @@
   --space-5: 24px;
   --space-6: 32px;
 
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
   color-scheme: dark;
 }
 
@@ -40,7 +51,6 @@ body {
   margin: 0;
   /* dvh keeps the layout stable while mobile browser bars collapse. */
   min-height: 100dvh;
-  background: radial-gradient(120% 90% at 50% 0%, #182238 0%, var(--bg) 55%);
   color: var(--text);
   font-family: var(--font);
   /* Keeps taps snappy and blocks double-tap zoom on the board. */
@@ -50,6 +60,12 @@ body {
 }
 
 body {
+  /* Two distant light sources: aqua overhead, magenta from the far corner. */
+  background:
+    radial-gradient(72% 52% at 8% -8%, color-mix(in srgb, var(--beam) 18%, transparent), transparent 70%),
+    radial-gradient(64% 48% at 104% 102%, color-mix(in srgb, var(--flare) 16%, transparent), transparent 66%),
+    var(--ink);
+  background-attachment: fixed;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
     env(safe-area-inset-left);
 }
@@ -65,7 +81,9 @@ h1,
 h2,
 h3 {
   margin: 0;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
 }
 
 p {
@@ -104,9 +122,9 @@ p {
 .topbar__title {
   flex: 1 1 auto;
   text-align: center;
+  font-family: var(--font-display);
   font-size: 1.05rem;
-  font-weight: 650;
-  letter-spacing: 0.01em;
+  font-weight: 600;
 }
 
 .stack {
@@ -122,12 +140,40 @@ p {
   flex-wrap: wrap;
 }
 
+/* Cards are lit plates: a hairline of the section accent runs along the top. */
 .card {
-  background: var(--bg-elevated);
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 88%, transparent),
+    color-mix(in srgb, var(--ink) 72%, transparent)
+  );
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 70%, transparent),
+    transparent
+  );
+}
+
+.card--solo {
+  --accent: var(--beam);
+}
+
+.card--challenge {
+  --accent: var(--flare);
 }
 
 .muted {
@@ -155,7 +201,8 @@ p {
 }
 
 .button:hover:not(:disabled) {
-  background: var(--surface-strong);
+  background: var(--surface-lift);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
 }
 
 .button:active:not(:disabled) {
@@ -168,23 +215,29 @@ p {
 }
 
 .button--primary {
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #ffffff), var(--accent));
   border-color: transparent;
-  color: #08101f;
+  color: #140f22;
+  box-shadow: var(--glow);
 }
 
 .button--primary:hover:not(:disabled) {
-  filter: brightness(1.06);
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 78%, #ffffff), var(--accent));
 }
 
 .button--ghost {
   background: transparent;
 }
 
-.button--danger {
-  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
-  color: var(--danger);
+/* Secondary call to action: states its accent without competing with the primary. */
+.button--outline {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--bone);
+}
+
+.button--outline:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .button--block {
@@ -197,7 +250,7 @@ p {
   padding: 0 var(--space-3);
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--ink) 55%, var(--surface));
   color: var(--text);
   font: inherit;
 }
@@ -215,7 +268,10 @@ p {
 }
 
 .field__label {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -229,29 +285,34 @@ p {
   min-height: 46px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--ink) 45%, var(--surface));
   font-weight: 600;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .segmented__option[aria-pressed='true'] {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
-  color: #eaf2ff;
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+  color: var(--bone);
+  box-shadow: var(--glow);
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 999px;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--ink) 40%, var(--surface));
   border: 1px solid var(--line);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
 }
 
 .tabular {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 

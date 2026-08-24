@@ -12,10 +12,11 @@ const OUT_DIR = path.resolve(
   '../packages/client/public/icons',
 );
 
-const BACKGROUND = [15, 20, 32];
-const GRID = [44, 56, 82];
-const ACCENT = [110, 168, 254];
-const LIGHT = [232, 236, 246];
+const BACKGROUND = [18, 16, 28];
+const GRID = [79, 68, 121];
+const BEAM = [95, 227, 208];
+const LAMP = [255, 180, 63];
+const LIGHT = [242, 236, 223];
 
 /** Draws the logo: a 3x3 grid with a few filled cells. */
 function drawIcon(size, { padding }) {
@@ -40,12 +41,12 @@ function drawIcon(size, { padding }) {
   const cell = Math.floor(board / 3);
   const line = Math.max(2, Math.round(size / 64));
 
-  // Filled cells forming a diagonal, plus one accent block.
+  // Bone clues on the diagonal, one aqua lamp, one amber entry: the palette in miniature.
   const filled = [
     [0, 0, LIGHT],
-    [1, 1, ACCENT],
+    [1, 1, BEAM],
     [2, 2, LIGHT],
-    [2, 0, GRID],
+    [2, 0, LAMP],
     [0, 2, GRID],
   ];
   for (const [column, row, color] of filled) {
