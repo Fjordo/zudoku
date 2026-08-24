@@ -50,7 +50,7 @@ jobs:
       # fails here instead of during `fly deploy`. The image is discarded with
       # the runner; only the layer cache below survives, and `mode=min` keeps it
       # to the final layers instead of the whole node_modules tree.
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           push: false
