@@ -125,6 +125,8 @@
  */
 .board__frame {
   position: relative;
+  /* Own stacking context: cell z-indexes stay local and never cover the overlay. */
+  isolation: isolate;
   width: min(100%, 68vh, calc(100dvh - 300px));
   margin: 0 auto;
 }
@@ -282,6 +284,12 @@
   color: var(--text-muted);
 }
 
+/* A finished or paused game must read as unavailable, not just be inert. */
+.pad__key:disabled,
+.cell:disabled {
+  opacity: 0.5;
+}
+
 .pad__digit {
   font-size: clamp(1.05rem, 4.6vw, 1.45rem);
   font-weight: 650;
@@ -329,6 +337,8 @@
 .overlay {
   position: absolute;
   inset: 0;
+  /* Above every cell: separators sit at 1, hint outline at 2, focus ring at 3. */
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -337,13 +347,17 @@
   padding: var(--space-5);
   text-align: center;
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(3px);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(6px);
 }
 
 .overlay__title {
-  font-size: 1.4rem;
+  font-size: clamp(1.15rem, 5.5vw, 1.5rem);
+}
+
+.overlay__title {
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 /* Landscape phones: board on the left, input on the right, nothing scrolls. */
