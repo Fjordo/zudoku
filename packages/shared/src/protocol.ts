@@ -56,7 +56,8 @@ export type ServerErrorCode =
   | 'invalid_name'
   | 'not_in_room'
   | 'invalid_solution'
-  | 'rate_limited';
+  | 'rate_limited'
+  | 'server_busy';
 
 export type ServerMessage =
   | { type: 'joined'; room: RoomSnapshot; playerId: string; sessionToken: string }

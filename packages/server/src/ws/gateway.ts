@@ -19,12 +19,24 @@ interface Session {
   /** Sliding window used for basic flood protection. */
   windowStart: number;
   messagesInWindow: number;
+  /** Separate, tighter window for the actions that cost memory or CPU. */
+  costlyWindowStart: number;
+  costlyActions: number;
 }
+
+/** Actions that allocate a room or generate a puzzle, both far from free. */
+const COSTLY_ACTIONS: ReadonlySet<ClientMessage['type']> = new Set([
+  'create_room',
+  'join_room',
+  'start_game',
+]);
 
 /** Bridges WebSocket connections to the room domain. */
 export function createGateway(server: Server, rooms: RoomManager): () => void {
   const wss = new WebSocketServer({ server, path: '/ws', maxPayload: config.maxMessageBytes });
   const sessions = new Map<WebSocket, Session>();
+  /** Server-wide budget for costly actions, shared by every connection. */
+  const costlyBudget = { windowStart: Date.now(), count: 0 };
 
   const send = (socket: WebSocket, message: ServerMessage): void => {
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
@@ -64,12 +76,30 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
     const target = message.type === 'join_room' ? normalizeRoomCode(message.code) : null;
     if (session.roomCode !== null && session.roomCode !== target) leaveCurrentRoom(session);
 
-    const room = message.type === 'create_room' ? rooms.create() : rooms.find(message.code);
+    if (message.type === 'create_room') {
+      const created = rooms.create();
+      if (!created) {
+        fail(socket, 'server_busy', 'The server is at capacity, try again shortly.');
+        return;
+      }
+      admit(socket, session, created, message);
+      return;
+    }
+
+    const room = rooms.find(message.code);
     if (!room) {
       fail(socket, 'room_not_found', 'This room code does not exist.');
       return;
     }
+    admit(socket, session, room, message);
+  };
 
+  const admit = (
+    socket: WebSocket,
+    session: Session,
+    room: Room,
+    message: Extract<ClientMessage, { type: 'create_room' | 'join_room' }>,
+  ): void => {
     const player = room.join(message.name, message.type === 'join_room' ? message.sessionToken : undefined);
     if (message.type === 'create_room') room.setDifficulty(player.id, message.difficulty);
 
@@ -167,6 +197,8 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
       alive: true,
       windowStart: Date.now(),
       messagesInWindow: 0,
+      costlyWindowStart: Date.now(),
+      costlyActions: 0,
     };
     sessions.set(socket, session);
 
@@ -182,6 +214,10 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
       const message = parseClientMessage(raw.toString());
       if (!message) {
         fail(socket, 'invalid_message', 'Unrecognized message.');
+        return;
+      }
+      if (COSTLY_ACTIONS.has(message.type) && !allowCostly(session, costlyBudget)) {
+        fail(socket, 'rate_limited', 'Too many rooms in a row.');
         return;
       }
       try {
@@ -229,6 +265,30 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
     clearInterval(sweeper);
     wss.close();
   };
+}
+
+interface Budget {
+  windowStart: number;
+  count: number;
+}
+
+/** Charges a costly action against the session budget and the server-wide one. */
+function allowCostly(session: Session, global: Budget): boolean {
+  const now = Date.now();
+  if (now - session.costlyWindowStart >= config.costlyActionWindowMs) {
+    session.costlyWindowStart = now;
+    session.costlyActions = 0;
+  }
+  session.costlyActions += 1;
+  if (now - global.windowStart >= 1000) {
+    global.windowStart = now;
+    global.count = 0;
+  }
+  global.count += 1;
+  return (
+    session.costlyActions <= config.maxCostlyActionsPerWindow &&
+    global.count <= config.maxCostlyActionsPerSecond
+  );
 }
 
 function isFlooding(session: Session): boolean {

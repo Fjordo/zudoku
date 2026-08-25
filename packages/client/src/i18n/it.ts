@@ -144,6 +144,7 @@ export const it: Dictionary = {
   'error.not_in_room': 'Entra prima in una stanza.',
   'error.invalid_solution': 'Questa griglia non è una soluzione valida.',
   'error.rate_limited': 'Troppe azioni, rallenta un attimo.',
+  'error.server_busy': 'Il server è al limite, riprova tra un attimo.',
 
   'techniques.title': 'Regole e tecniche avanzate',
   'techniques.rulesTitle': 'Le regole',

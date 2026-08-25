@@ -156,6 +156,21 @@ describe('websocket gateway', () => {
     client.close();
   });
 
+  it('throttles a burst of room creations from one socket', async () => {
+    const client = await TestClient.connect();
+    for (let i = 0; i <= config.maxCostlyActionsPerWindow; i += 1) {
+      client.send({ type: 'create_room', name: 'Ada', difficulty: 'easy' });
+    }
+    expect((await client.next('error')).code).toBe('rate_limited');
+    client.close();
+  });
+
+  it('reports the server as busy once the room registry is full', async () => {
+    const full = new RoomManager({ ttlMs: 60_000, maxRooms: 1 });
+    expect(full.create()).not.toBeNull();
+    expect(full.create()).toBeNull();
+  });
+
   it('drops a connection that sends a frame larger than the payload cap', async () => {
     const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
     await new Promise((resolve, reject) => {

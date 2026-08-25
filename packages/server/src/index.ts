@@ -5,7 +5,7 @@ import { createApp } from './http/app.js';
 import { RoomManager } from './rooms/roomManager.js';
 import { createGateway } from './ws/gateway.js';
 
-const rooms = new RoomManager({ ttlMs: config.roomTtlMs });
+const rooms = new RoomManager({ ttlMs: config.roomTtlMs, maxRooms: config.maxRooms });
 const server = createServer(createApp(rooms));
 const closeGateway = createGateway(server, rooms);
 

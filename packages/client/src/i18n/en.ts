@@ -141,6 +141,7 @@ export const en = {
   'error.not_in_room': 'Join a room first.',
   'error.invalid_solution': 'That grid is not a valid solution.',
   'error.rate_limited': 'Too many actions, slow down a little.',
+  'error.server_busy': 'The server is at capacity, try again in a moment.',
 
   'techniques.title': 'Rules and advanced techniques',
   'techniques.rulesTitle': 'The rules',

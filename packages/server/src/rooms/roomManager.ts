@@ -4,6 +4,8 @@ import { Room, defaultRoomDeps, type RoomDeps } from './room.js';
 export interface RoomManagerOptions {
   /** Rooms idle for longer than this are dropped by `sweep`. */
   ttlMs: number;
+  /** Ceiling on live rooms; `create` returns null once it is reached. */
+  maxRooms?: number;
   deps?: Partial<RoomDeps>;
 }
 
@@ -20,7 +22,9 @@ export class RoomManager {
     return this.rooms.size;
   }
 
-  create(): Room {
+  /** Returns null when the registry is full rather than growing without bound. */
+  create(): Room | null {
+    if (this.rooms.size >= (this.options.maxRooms ?? Infinity)) return null;
     const room = new Room(this.generateCode(), this.deps);
     this.rooms.set(room.code, room);
     return room;
