@@ -67,6 +67,11 @@ class TestClient {
     return new Promise((resolve) => this.waiters.push({ type, resolve: resolve as never }));
   }
 
+  /** How many messages of this type have arrived so far. */
+  count(type: ServerMessage['type']): number {
+    return this.received.filter((message) => message.type === type).length;
+  }
+
   forget(): void {
     this.received.length = 0;
   }
@@ -194,6 +199,51 @@ describe('websocket gateway', () => {
     expect(error.message).toContain('429');
 
     for (const socket of held) socket.close();
+  });
+
+  it('sends a room update only to the sockets seated in that room', async () => {
+    const host = await TestClient.connect();
+    host.send({ type: 'create_room', name: 'Ada', difficulty: 'easy' });
+    const opened = await host.next('joined');
+
+    const outsider = await TestClient.connect();
+    outsider.send({ type: 'create_room', name: 'Linus', difficulty: 'easy' });
+    await outsider.next('joined');
+    outsider.forget();
+
+    const guest = await TestClient.connect();
+    guest.send({ type: 'join_room', code: opened.room.code, name: 'Grace' });
+    await guest.next('joined');
+    await host.next('room_update');
+
+    // The broadcast walks the room's own sockets, so the other room sees nothing.
+    expect(host.count('room_update')).toBeGreaterThan(0);
+    expect(outsider.count('room_update')).toBe(0);
+
+    host.close();
+    guest.close();
+    outsider.close();
+  });
+
+  it('stops broadcasting to a socket that has left the room', async () => {
+    const host = await TestClient.connect();
+    host.send({ type: 'create_room', name: 'Ada', difficulty: 'easy' });
+    const opened = await host.next('joined');
+
+    const guest = await TestClient.connect();
+    guest.send({ type: 'join_room', code: opened.room.code, name: 'Grace' });
+    await guest.next('joined');
+
+    guest.send({ type: 'leave' });
+    await host.next('room_update');
+    guest.forget();
+
+    host.send({ type: 'set_ready', ready: true });
+    await vi.waitFor(() => expect(rooms.find(opened.room.code)?.playerCount).toBe(1));
+    expect(guest.count('room_update')).toBe(0);
+
+    host.close();
+    guest.close();
   });
 
   it('throttles a burst of room creations from one socket', async () => {

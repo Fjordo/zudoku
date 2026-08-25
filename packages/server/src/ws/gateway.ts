@@ -88,10 +88,44 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   const fail = (socket: WebSocket, code: ServerErrorCode, message: string): void =>
     send(socket, { type: 'error', code, message });
 
+  /**
+   * Sockets seated in each room. Finding them by walking every session made one
+   * `progress` message cost the whole server: with each player allowed 30 a
+   * second, the work grew as the square of the connection count.
+   */
+  const members = new Map<string, Set<WebSocket>>();
+
+  const addMember = (socket: WebSocket, roomCode: string): void => {
+    const seated = members.get(roomCode);
+    if (seated) seated.add(socket);
+    else members.set(roomCode, new Set([socket]));
+  };
+
+  const dropMember = (socket: WebSocket, roomCode: string | null): void => {
+    if (roomCode === null) return;
+    const seated = members.get(roomCode);
+    if (!seated) return;
+    seated.delete(socket);
+    if (seated.size === 0) members.delete(roomCode);
+  };
+
+  /** Records the seat this socket holds, on the session and in the index alike. */
+  const takeSeat = (socket: WebSocket, session: Session, room: Room, player: Player): void => {
+    dropMember(socket, session.roomCode);
+    session.roomCode = room.code;
+    session.playerId = player.id;
+    addMember(socket, room.code);
+  };
+
+  /** Forgets the seat this socket holds, without touching the room itself. */
+  const clearSeat = (socket: WebSocket, session: Session): void => {
+    dropMember(socket, session.roomCode);
+    session.roomCode = null;
+    session.playerId = null;
+  };
+
   const broadcast = (room: Room, message: ServerMessage): void => {
-    for (const [socket, session] of sessions) {
-      if (session.roomCode === room.code) send(socket, message);
-    }
+    for (const socket of members.get(room.code) ?? []) send(socket, message);
   };
 
   const broadcastRoom = (room: Room): void => broadcast(room, { type: 'room_update', room: room.snapshot() });
@@ -100,14 +134,15 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
     session.roomCode ? rooms.find(session.roomCode) : undefined;
 
   /** Gives up the seat this socket holds, if any. */
-  const leaveCurrentRoom = (session: Session): void => {
+  const leaveCurrentRoom = (socket: WebSocket, session: Session): void => {
     const room = currentRoom(session);
     if (room && session.playerId) {
       room.remove(session.playerId);
+      // Broadcast before the seat is dropped, so the leaver still sees the room
+      // it is stepping out of, exactly as it did before the index existed.
       broadcastRoom(room);
     }
-    session.roomCode = null;
-    session.playerId = null;
+    clearSeat(socket, session);
   };
 
   const enterRoom = (socket: WebSocket, session: Session, message: ClientMessage): void => {
@@ -128,7 +163,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
         return;
       }
     }
-    if (session.roomCode !== null) leaveCurrentRoom(session);
+    if (session.roomCode !== null) leaveCurrentRoom(socket, session);
 
     if (message.type === 'create_room') {
       const created = rooms.create();
@@ -151,8 +186,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   };
 
   const admit = (socket: WebSocket, session: Session, room: Room, player: Player): void => {
-    session.roomCode = room.code;
-    session.playerId = player.id;
+    takeSeat(socket, session, room, player);
     send(socket, {
       type: 'joined',
       room: room.snapshot(),
@@ -227,8 +261,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
         break;
       case 'leave':
         room.remove(playerId);
-        session.roomCode = null;
-        session.playerId = null;
+        clearSeat(socket, session);
         broadcastRoom(room);
         break;
     }
@@ -286,6 +319,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
 
     socket.on('close', () => {
       const room = currentRoom(session);
+      dropMember(socket, session.roomCode);
       if (room && session.playerId) {
         room.disconnect(session.playerId);
         broadcastRoom(room);
