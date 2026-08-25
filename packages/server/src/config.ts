@@ -14,4 +14,6 @@ export const config = {
   /** Interval between WebSocket liveness probes. */
   heartbeatIntervalMs: 30 * 1000,
   maxMessagesPerSecond: 30,
+  /** Largest accepted WebSocket frame. Every protocol message is a few hundred bytes. */
+  maxMessageBytes: 16 * 1024,
 } as const;

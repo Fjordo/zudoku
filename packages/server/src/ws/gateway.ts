@@ -18,7 +18,7 @@ interface Session {
 
 /** Bridges WebSocket connections to the room domain. */
 export function createGateway(server: Server, rooms: RoomManager): () => void {
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  const wss = new WebSocketServer({ server, path: '/ws', maxPayload: config.maxMessageBytes });
   const sessions = new Map<WebSocket, Session>();
 
   const send = (socket: WebSocket, message: ServerMessage): void => {

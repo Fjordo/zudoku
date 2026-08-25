@@ -8,6 +8,7 @@ import {
   type ClientMessage,
   type ServerMessage,
 } from '@zudoku/shared';
+import { config } from '../config.js';
 import { RoomManager } from '../rooms/roomManager.js';
 import { createGateway } from './gateway.js';
 
@@ -134,6 +135,20 @@ describe('websocket gateway', () => {
     client.send({ type: 'start_game' });
     expect((await client.next('error')).code).toBe('not_in_room');
     client.close();
+  });
+
+  it('drops a connection that sends a frame larger than the payload cap', async () => {
+    const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
+    await new Promise((resolve, reject) => {
+      socket.once('open', resolve);
+      socket.once('error', reject);
+    });
+    const closed = new Promise<number>((resolve) => socket.once('close', resolve));
+
+    socket.send(JSON.stringify({ type: 'ping', pad: 'a'.repeat(config.maxMessageBytes) }));
+
+    // 1009 "message too big": the frame is refused before it is buffered and parsed.
+    expect(await closed).toBe(1009);
   });
 });
 
