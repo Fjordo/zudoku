@@ -46,7 +46,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // The server hosts dist/ as-is, so a source map here is a public copy of
+    // the whole client. Build with SOURCEMAP=1 when a production bug needs one.
+    sourcemap: process.env.SOURCEMAP === '1',
   },
   test: {
     environment: 'jsdom',
