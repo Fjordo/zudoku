@@ -102,7 +102,9 @@ export function SoloGame({
       locked={paused}
       overlay={overlay}
       aside={
-        <div className="card stack">
+        // Both actions stay in reach while the game runs: a new puzzle never
+        // waits for this one to be lost.
+        <div className="card stack game__actions">
           <button
             type="button"
             className="button button--block"
@@ -112,7 +114,7 @@ export function SoloGame({
             {paused ? t('game.resume') : t('game.pause')}
           </button>
           <button type="button" className="button button--block" onClick={onNewGame}>
-            {t('game.newPuzzle')}
+            {t('game.newGame')}
           </button>
           <p className="small muted game__keyboard-help">{t('game.keyboardHelp')}</p>
         </div>

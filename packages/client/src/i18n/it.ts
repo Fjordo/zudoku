@@ -41,8 +41,7 @@ export const it: Dictionary = {
   'game.pause': 'Pausa',
   'game.resume': 'Riprendi',
   'game.paused': 'In pausa',
-  'game.newPuzzle': 'Nuovo schema',
-  'game.newGame': 'Nuova partita',
+  'game.newGame': 'Avvia nuova partita',
   'game.keyboardHelp':
     'Tastiera: 1-9 per inserire, N per le note, H per un aiuto, frecce per muoverti, backspace per cancellare le note.',
   'game.solved': 'Risolto!',

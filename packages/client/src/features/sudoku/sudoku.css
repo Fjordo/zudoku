@@ -604,6 +604,7 @@
     font-size: 0.88rem;
   }
 
+  .game__layout,
   .game__main {
     gap: var(--space-2);
   }
@@ -650,6 +651,67 @@
     font-size: 0.72rem;
   }
 
+  /*
+   * Pause and a fresh puzzle belong to the same cluster as the keypad here, so
+   * on a phone they drop the card and sit as one more row of controls.
+   */
+  .game .game__actions {
+    flex-direction: row;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+  }
+
+  .game .game__actions::before {
+    display: none;
+  }
+
+  .game .game__actions .button {
+    flex: 1 1 0;
+    min-height: 48px;
+    padding: 0 var(--space-2);
+  }
+}
+
+/*
+ * Phones held upright: the keypad is the instrument you actually play, so it
+ * stops pretending to be a strip of nine hairline keys. Two rows, thumb-sized,
+ * the second centred under the first — the board gives up the height for it.
+ */
+@media (max-width: 600px) and (orientation: portrait) {
+  /* Keypad, controls and the two game actions all come out of the board's height. */
+  .board__frame {
+    --board-reserve: 390px;
+  }
+
+  .game--hinted .board__frame {
+    --board-reserve: 470px;
+  }
+
+  .pad {
+    grid-template-columns: repeat(10, 1fr);
+    gap: var(--space-2);
+  }
+
+  .pad__key {
+    grid-column: auto / span 2;
+    min-height: 62px;
+    gap: 2px;
+  }
+
+  /* Nine keys over two rows: the row of four sits centred under the row of five. */
+  .pad__key:nth-child(6) {
+    grid-column: 2 / span 2;
+  }
+
+  .pad__digit {
+    font-size: 1.7rem;
+  }
+
+  .pad__count {
+    font-size: 0.68rem;
+  }
 }
 
 /* Touch phones: the shortcut list names keys the device does not have. */
