@@ -199,7 +199,14 @@
 
 .board {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  /*
+   * Both axes are stated, and stated as minmax(0, 1fr): implicit rows would be
+   * sized by their content, so a row holding no digit at all came out half as
+   * tall as its neighbours, and the zero floor keeps a cell full of pencil
+   * marks from pushing its row past its ninth of the plate.
+   */
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-rows: repeat(9, minmax(0, 1fr));
   /* Digits scale with the board itself, not the viewport, so every layout fits. */
   container-type: inline-size;
   /* Long presses must not start a text selection on the grid. */
@@ -222,6 +229,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /* A grid item defaults to its content as its minimum; the plate decides here. */
+  min-width: 0;
+  min-height: 0;
   padding: 0;
   border: none;
   background: var(--plate);
