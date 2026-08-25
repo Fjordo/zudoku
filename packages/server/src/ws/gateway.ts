@@ -1,6 +1,11 @@
 import type { Server } from 'node:http';
 import { WebSocket, WebSocketServer } from 'ws';
-import type { ClientMessage, ServerErrorCode, ServerMessage } from '@zudoku/shared';
+import {
+  normalizeRoomCode,
+  type ClientMessage,
+  type ServerErrorCode,
+  type ServerMessage,
+} from '@zudoku/shared';
 import { config } from '../config.js';
 import { logger } from '../logger.js';
 import { RoomFailure, type Room } from '../rooms/room.js';
@@ -39,8 +44,25 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   const currentRoom = (session: Session): Room | undefined =>
     session.roomCode ? rooms.find(session.roomCode) : undefined;
 
+  /** Gives up the seat this socket holds, if any. */
+  const leaveCurrentRoom = (session: Session): void => {
+    const room = currentRoom(session);
+    if (room && session.playerId) {
+      room.remove(session.playerId);
+      broadcastRoom(room);
+    }
+    session.roomCode = null;
+    session.playerId = null;
+  };
+
   const enterRoom = (socket: WebSocket, session: Session, message: ClientMessage): void => {
     if (message.type !== 'create_room' && message.type !== 'join_room') return;
+
+    // One socket holds one seat. Without this the abandoned room kept a player
+    // marked connected that nothing would ever disconnect, so the sweeper never
+    // collected it and every extra create_room leaked a room for good.
+    const target = message.type === 'join_room' ? normalizeRoomCode(message.code) : null;
+    if (session.roomCode !== null && session.roomCode !== target) leaveCurrentRoom(session);
 
     const room = message.type === 'create_room' ? rooms.create() : rooms.find(message.code);
     if (!room) {

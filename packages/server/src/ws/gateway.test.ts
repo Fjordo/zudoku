@@ -14,11 +14,13 @@ import { createGateway } from './gateway.js';
 
 let server: Server;
 let closeGateway: () => void;
+let rooms: RoomManager;
 let port: number;
 
 beforeEach(async () => {
   server = createServer();
-  closeGateway = createGateway(server, new RoomManager({ ttlMs: 60_000 }));
+  rooms = new RoomManager({ ttlMs: 60_000 });
+  closeGateway = createGateway(server, rooms);
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   port = typeof address === 'object' && address ? address.port : 0;
@@ -134,6 +136,23 @@ describe('websocket gateway', () => {
     const client = await TestClient.connect();
     client.send({ type: 'start_game' });
     expect((await client.next('error')).code).toBe('not_in_room');
+    client.close();
+  });
+
+  it('releases the previous room when a socket enters another one', async () => {
+    const client = await TestClient.connect();
+    client.send({ type: 'create_room', name: 'Ada', difficulty: 'easy' });
+    await client.next('joined');
+    expect(rooms.size).toBe(1);
+
+    client.forget();
+    client.send({ type: 'create_room', name: 'Ada', difficulty: 'easy' });
+    await client.next('joined');
+
+    // The abandoned room must end up empty, otherwise the sweeper keeps it forever.
+    rooms.sweep();
+    expect(rooms.size).toBe(1);
+
     client.close();
   });
 
