@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Nothing here writes to the repository, so the token gets read access only.
+permissions:
+  contents: read
+
 # A new push to the same branch makes the previous run obsolete.
 concurrency:
   group: ci-${{ github.ref }}
