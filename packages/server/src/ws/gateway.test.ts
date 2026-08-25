@@ -10,7 +10,7 @@ import {
 } from '@zudoku/shared';
 import { config } from '../config.js';
 import { RoomManager } from '../rooms/roomManager.js';
-import { createGateway } from './gateway.js';
+import { createGateway, isAllowedOrigin } from './gateway.js';
 
 let server: Server;
 let closeGateway: () => void;
@@ -171,6 +171,23 @@ describe('websocket gateway', () => {
     expect(full.create()).toBeNull();
   });
 
+  it('refuses a handshake sent from another origin', async () => {
+    const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`, { origin: 'https://evil.example' });
+    const error = await new Promise<Error>((resolve) => socket.once('error', resolve));
+    expect(error.message).toContain('401');
+  });
+
+  it('accepts a handshake whose origin matches the host it was sent to', async () => {
+    const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`, {
+      origin: `http://127.0.0.1:${port}`,
+    });
+    await new Promise((resolve, reject) => {
+      socket.once('open', resolve);
+      socket.once('error', reject);
+    });
+    socket.close();
+  });
+
   it('drops a connection that sends a frame larger than the payload cap', async () => {
     const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
     await new Promise((resolve, reject) => {
@@ -192,3 +209,15 @@ function solveFromPuzzle(puzzle: string): string {
   if (!solved) throw new Error('unsolvable puzzle');
   return gridToString(solved);
 }
+
+describe('origin check', () => {
+  it('lets a non-browser client with no Origin through', () => {
+    expect(isAllowedOrigin(undefined, 'zudoku.fly.dev')).toBe(true);
+  });
+
+  it('accepts the host the request was addressed to and rejects anything else', () => {
+    expect(isAllowedOrigin('https://zudoku.fly.dev', 'zudoku.fly.dev')).toBe(true);
+    expect(isAllowedOrigin('https://evil.example', 'zudoku.fly.dev')).toBe(false);
+    expect(isAllowedOrigin('not a url', 'zudoku.fly.dev')).toBe(false);
+  });
+});

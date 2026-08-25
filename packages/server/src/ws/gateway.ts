@@ -1,4 +1,4 @@
-import type { Server } from 'node:http';
+import type { IncomingMessage, Server } from 'node:http';
 import { WebSocket, WebSocketServer } from 'ws';
 import {
   normalizeRoomCode,
@@ -31,9 +31,37 @@ const COSTLY_ACTIONS: ReadonlySet<ClientMessage['type']> = new Set([
   'start_game',
 ]);
 
+/**
+ * The same-origin policy does not cover WebSockets and browsers send no
+ * preflight, so without this check any site could open room sockets from its
+ * visitors' browsers. Clients that are not browsers send no Origin at all and
+ * are left alone: they cannot be used to attack a third party's session.
+ */
+export function isAllowedOrigin(origin: string | undefined, host: string | undefined): boolean {
+  if (!origin) return true;
+  if (config.allowedOrigins.length > 0) return config.allowedOrigins.includes(origin);
+
+  let url: URL;
+  try {
+    url = new URL(origin);
+  } catch {
+    return false;
+  }
+  if (url.host === host) return true;
+
+  // Outside production the Vite dev server proxies /ws from its own port.
+  return !config.isProduction && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
+}
+
 /** Bridges WebSocket connections to the room domain. */
 export function createGateway(server: Server, rooms: RoomManager): () => void {
-  const wss = new WebSocketServer({ server, path: '/ws', maxPayload: config.maxMessageBytes });
+  const wss = new WebSocketServer({
+    server,
+    path: '/ws',
+    maxPayload: config.maxMessageBytes,
+    verifyClient: (info: { origin: string; req: IncomingMessage }) =>
+      isAllowedOrigin(info.origin, info.req.headers.host),
+  });
   const sessions = new Map<WebSocket, Session>();
   /** Server-wide budget for costly actions, shared by every connection. */
   const costlyBudget = { windowStart: Date.now(), count: 0 };
