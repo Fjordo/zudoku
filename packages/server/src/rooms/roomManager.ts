@@ -1,3 +1,4 @@
+import { randomInt } from 'node:crypto';
 import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH, normalizeRoomCode } from '@zudoku/shared';
 import { Room, defaultRoomDeps, type RoomDeps } from './room.js';
 
@@ -52,11 +53,16 @@ export class RoomManager {
     return removed;
   }
 
+  /**
+   * The code is the only thing guarding a room, so it comes from the CSPRNG:
+   * Math.random is a predictable PRNG whose state can be recovered from a
+   * handful of outputs, which would let an observer derive later codes.
+   */
   private generateCode(): string {
     for (let attempt = 0; attempt < 100; attempt += 1) {
       const code = Array.from(
         { length: ROOM_CODE_LENGTH },
-        () => ROOM_CODE_ALPHABET[Math.floor(Math.random() * ROOM_CODE_ALPHABET.length)],
+        () => ROOM_CODE_ALPHABET[randomInt(ROOM_CODE_ALPHABET.length)],
       ).join('');
       if (!this.rooms.has(code)) return code;
     }
