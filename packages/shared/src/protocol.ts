@@ -79,5 +79,15 @@ export const normalizeRoomCode = (code: string): string => code.trim().toUpperCa
 export const isValidRoomCode = (code: string): boolean =>
   new RegExp(`^[${ROOM_CODE_ALPHABET}]{${ROOM_CODE_LENGTH}}$`).test(normalizeRoomCode(code));
 
+/**
+ * A name sits next to the other players, so anything that can forge that
+ * display is dropped before it is stored: control characters, the bidi
+ * overrides that make a name render backwards or swallow the label beside it,
+ * and the zero-width characters that let two players share one apparent name.
+ */
 export const sanitizePlayerName = (name: string): string =>
-  name.replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
+  name
+    .replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_NAME_LENGTH);
