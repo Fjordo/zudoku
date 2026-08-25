@@ -35,6 +35,14 @@ export const config = {
   costlyActionWindowMs: 10 * 1000,
   /** Same budget across every connection, so a fleet of sockets cannot stall the loop. */
   maxCostlyActionsPerSecond: 10,
+  /** Concurrent sockets one address may hold open. */
+  maxSocketsPerAddress: Number(process.env.MAX_SOCKETS_PER_ADDRESS ?? 12),
+  /**
+   * Read the forwarded client address instead of the socket peer. Only turn this
+   * on behind a proxy that overwrites the header, otherwise a client picks its
+   * own identity and every per-address limit above becomes decorative.
+   */
+  trustProxy: process.env.TRUST_PROXY === '1',
   /** Warm puzzles kept ready per difficulty, and how often one is generated. */
   puzzlePoolSize: Number(process.env.PUZZLE_POOL_SIZE ?? 8),
   puzzlePoolRefillMs: 500,

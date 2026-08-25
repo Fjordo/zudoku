@@ -9,6 +9,11 @@ primary_region = "cdg"
 [env]
   NODE_ENV = "production"
   PORT = "8080"
+  # Traffic only ever reaches the app through the Fly proxy, so the socket peer
+  # is the proxy itself and every visitor would share one bucket: the per-address
+  # limits would then act as a global cap. The proxy overwrites Fly-Client-IP, so
+  # trusting it here is what makes those limits see the real client.
+  TRUST_PROXY = "1"
 
 [http_service]
   internal_port = 8080

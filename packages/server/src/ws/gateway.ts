@@ -10,9 +10,12 @@ import { config } from '../config.js';
 import { logger } from '../logger.js';
 import { RoomFailure, type Player, type Room } from '../rooms/room.js';
 import type { RoomManager } from '../rooms/roomManager.js';
+import { AddressLimits, clientAddress } from './limits.js';
 import { parseClientMessage } from './parseMessage.js';
 
 interface Session {
+  /** Peer address, so the per-connection budgets cannot be multiplied by opening more. */
+  address: string;
   roomCode: string | null;
   playerId: string | null;
   alive: boolean;
@@ -55,12 +58,26 @@ export function isAllowedOrigin(origin: string | undefined, host: string | undef
 
 /** Bridges WebSocket connections to the room domain. */
 export function createGateway(server: Server, rooms: RoomManager): () => void {
+  const limits = new AddressLimits();
   const wss = new WebSocketServer({
     server,
     path: '/ws',
     maxPayload: config.maxMessageBytes,
-    verifyClient: (info: { origin: string; req: IncomingMessage }) =>
-      isAllowedOrigin(info.origin, info.req.headers.host),
+    verifyClient: (
+      info: { origin: string; req: IncomingMessage },
+      done: (result: boolean, code?: number, message?: string) => void,
+    ) => {
+      if (!isAllowedOrigin(info.origin, info.req.headers.host)) {
+        done(false, 401, 'Origin not allowed');
+        return;
+      }
+      // Refused at the handshake, before a session and its budgets exist.
+      if (!limits.canAccept(clientAddress(info.req))) {
+        done(false, 429, 'Too many connections from this address');
+        return;
+      }
+      done(true);
+    },
   });
   const sessions = new Map<WebSocket, Session>();
   /** Server-wide budget for costly actions, shared by every connection. */
@@ -223,8 +240,11 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
     }
   };
 
-  wss.on('connection', (socket) => {
+  wss.on('connection', (socket, request) => {
+    const address = clientAddress(request);
+    limits.open(address);
     const session: Session = {
+      address,
       roomCode: null,
       playerId: null,
       alive: true,
@@ -272,6 +292,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
         broadcastRoom(room);
       }
       sessions.delete(socket);
+      limits.close(session.address);
     });
 
     socket.on('error', (error) => logger.warn('socket error', { error: String(error) }));

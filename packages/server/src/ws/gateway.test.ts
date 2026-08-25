@@ -178,6 +178,24 @@ describe('websocket gateway', () => {
     expect(rooms.find(code)).toBeUndefined();
   });
 
+  it('refuses more sockets than one address may hold open', async () => {
+    const held: WebSocket[] = [];
+    for (let opened = 0; opened < config.maxSocketsPerAddress; opened += 1) {
+      const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`);
+      await new Promise((resolve, reject) => {
+        socket.once('open', resolve);
+        socket.once('error', reject);
+      });
+      held.push(socket);
+    }
+
+    const refused = new WebSocket(`ws://127.0.0.1:${port}/ws`);
+    const error = await new Promise<Error>((resolve) => refused.once('error', resolve));
+    expect(error.message).toContain('429');
+
+    for (const socket of held) socket.close();
+  });
+
   it('throttles a burst of room creations from one socket', async () => {
     const client = await TestClient.connect();
     for (let i = 0; i <= config.maxCostlyActionsPerWindow; i += 1) {
