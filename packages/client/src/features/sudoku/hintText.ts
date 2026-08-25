@@ -11,12 +11,6 @@ export interface RenderedHint {
 /** Turns a structured hint into a sentence in the active language. */
 export function renderHint(hint: HintInfo, t: I18n['t']): RenderedHint {
   if (hint.kind === 'none') return { message: t('hint.none'), technique: null };
-  if (hint.kind === 'wrong') {
-    return {
-      message: t('hint.wrong', { cell: cellName(hint.index), digit: hint.digit }),
-      technique: null,
-    };
-  }
 
   const { step } = hint;
   // XY-Wing names three digits and the eliminated one is the last.

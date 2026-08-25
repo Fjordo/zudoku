@@ -44,7 +44,7 @@ export const it: Dictionary = {
   'game.newPuzzle': 'Nuovo schema',
   'game.newGame': 'Nuova partita',
   'game.keyboardHelp':
-    'Tastiera: 1-9 per inserire, N per le note, H per un aiuto, frecce per muoverti, backspace per cancellare.',
+    'Tastiera: 1-9 per inserire, N per le note, H per un aiuto, frecce per muoverti, backspace per cancellare le note.',
   'game.solved': 'Risolto!',
   'game.solvedDetail': 'Completato in {time} con {mistakes} errori.',
   'game.lost': 'Vite esaurite',
@@ -67,7 +67,6 @@ export const it: Dictionary = {
   'unit.box': 'riquadro {position}',
 
   'hint.none': 'Nessun altro passaggio logico disponibile.',
-  'hint.wrong': 'In {cell} non può esserci {digit}. Cancellalo prima di proseguire.',
   'hint.naked_single': 'In {cell} resta un solo candidato: {digit}.',
   'hint.hidden_single': 'Il {digit} può stare solo in {cell} nella {unit}.',
   'hint.naked_pair': '{cells} nella {unit} contengono solo {digits}: quei numeri escono dal resto dell’unità.',
@@ -154,7 +153,7 @@ export const it: Dictionary = {
     'Riempi la griglia 9x9 in modo che ogni riga, ogni colonna e ogni riquadro 3x3 contenga i numeri da 1 a 9 una sola volta.',
     'Uno schema valido ha una sola soluzione e non richiede mai di tirare a indovinare: ogni numero si deduce.',
     'Le note (matite) registrano i candidati di una cella. Tenerle aggiornate è ciò che rende visibili le tecniche qui sotto.',
-    'In questa app tre numeri sbagliati chiudono la partita: meglio una deduzione che sai giustificare.',
+    'In questa app un numero corretto resta sulla griglia per sempre, uno sbagliato viene respinto e costa una vita: al terzo errore la partita si chiude.',
   ],
   'level.basic': 'Base',
   'level.intermediate': 'Intermedio',

@@ -56,7 +56,7 @@ export function SoloGame({
 
   useEffect(() => {
     if (state.status === 'playing') {
-      saveSoloGame({ version: 1, difficulty, state, elapsedMs: elapsedRef.current, savedAt: Date.now() });
+      saveSoloGame({ version: 2, difficulty, state, elapsedMs: elapsedRef.current, savedAt: Date.now() });
     } else {
       clearSoloGame();
     }

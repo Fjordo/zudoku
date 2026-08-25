@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CELL_COUNT, SIZE } from '@zudoku/shared';
 import {
+  FLASH_MS,
   computeHighlight,
   createGame,
   filledCount,
@@ -61,6 +62,18 @@ export function useSudokuGame(setup: GameSetup, restored?: GameState | null): Su
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [erase, hint, input, state.selected, toggleNotes]);
+
+  // The board animates the last entry, then the flash is dropped so the cell
+  // goes back to its resting state — empty for a rejected digit.
+  const flash = state.flash;
+  useEffect(() => {
+    if (!flash) return;
+    const timer = window.setTimeout(
+      () => dispatch({ type: 'clear_flash', id: flash.id }),
+      FLASH_MS[flash.kind],
+    );
+    return () => window.clearTimeout(timer);
+  }, [flash]);
 
   const highlight = useMemo(() => computeHighlight(state), [state]);
   const filled = useMemo(() => filledCount(state), [state]);

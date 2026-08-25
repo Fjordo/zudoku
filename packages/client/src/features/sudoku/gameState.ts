@@ -3,9 +3,11 @@ import {
   EMPTY_CELL,
   MAX_MISTAKES,
   PEERS,
+  SIZE,
   colOf,
   findNextStep,
   gridToString,
+  indexOf,
   parseGrid,
   rowOf,
   type Step,
@@ -33,28 +35,38 @@ export interface GameState {
   history: HistoryEntry[];
   /** Explanation of the last hint, shown until the player moves again. */
   hint: HintInfo | null;
+  /** Last digit the board is still animating; cleared on a timer. */
+  flash: Flash | null;
 }
+
+/**
+ * The two answers the board can give to an entry: a correct digit seats for
+ * good, a wrong one is shaken off and never lands.
+ */
+export interface Flash {
+  index: number;
+  digit: number;
+  kind: 'locked' | 'rejected';
+  /** Restarts the animation when the same cell flashes twice in a row. */
+  id: number;
+}
+
+/** How long the board plays each flash before the reducer drops it. */
+export const FLASH_MS: Record<Flash['kind'], number> = { locked: 460, rejected: 580 };
 
 /**
  * Hints are stored structurally, not as text, so the UI can render them in the
  * player's language and re-render on a language change.
  */
-export type HintInfo =
-  | { kind: 'step'; step: Step }
-  | { kind: 'wrong'; index: number; digit: number }
-  | { kind: 'none' };
+export type HintInfo = { kind: 'step'; step: Step } | { kind: 'none' };
 
 /** Cells the hint refers to, highlighted on the board. */
-export const hintCells = (hint: HintInfo | null): number[] => {
-  if (!hint) return [];
-  if (hint.kind === 'step') return hint.step.cells;
-  return hint.kind === 'wrong' ? [hint.index] : [];
-};
+export const hintCells = (hint: HintInfo | null): number[] =>
+  hint?.kind === 'step' ? hint.step.cells : [];
 
+/** Only pencil marks are reversible, so that is all a history entry holds. */
 interface HistoryEntry {
-  cells: number[];
   notes: number[];
-  mistakes: number;
 }
 
 export type GameAction =
@@ -65,6 +77,7 @@ export type GameAction =
   | { type: 'hint' }
   | { type: 'dismiss_hint' }
   | { type: 'undo' }
+  | { type: 'clear_flash'; id: number }
   | { type: 'highlight'; digit: number | null }
   | { type: 'give_up' };
 
@@ -95,6 +108,7 @@ export function createGame({ puzzle, solution, hints }: GameSetup): GameState {
     status: 'playing',
     history: [],
     hint: null,
+    flash: null,
   };
 }
 
@@ -103,10 +117,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'select': {
       const index = action.index;
       if (index === null) return { ...state, selected: null };
+      // A filled cell puts its digit in play; an empty one only reads its own
+      // row and column, so no digit stays lit across the rest of the grid.
       return {
         ...state,
         selected: index,
-        activeDigit: state.cells[index] !== EMPTY_CELL ? state.cells[index] : state.activeDigit,
+        activeDigit: state.cells[index] !== EMPTY_CELL ? state.cells[index] : null,
       };
     }
     case 'highlight':
@@ -123,6 +139,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return applyUndo(state);
     case 'dismiss_hint':
       return state.hint === null ? state : { ...state, hint: null };
+    case 'clear_flash':
+      return state.flash?.id === action.id ? { ...state, flash: null } : state;
     case 'give_up':
       return state.status === 'playing' ? { ...state, status: 'lost' } : state;
     default:
@@ -136,49 +154,51 @@ function applyInput(state: GameState, digit: number): GameState {
   if (state.status !== 'playing' || index === null || isLocked(state, index)) return next;
 
   if (state.notesMode) {
-    if (state.cells[index] !== EMPTY_CELL) return next;
     const notes = [...state.notes];
     notes[index] ^= noteBit(digit);
     return { ...next, notes, hint: null, history: pushHistory(state) };
   }
 
-  if (state.cells[index] === digit) return next;
+  const flash = (kind: Flash['kind']): Flash => ({ index, digit, kind, id: nextFlashId(state) });
+
+  if (digit !== solutionAt(state, index)) {
+    // A wrong digit costs a life and bounces off: only truth stays on the grid.
+    const mistakes = state.mistakes + 1;
+    return {
+      ...next,
+      mistakes,
+      status: resolveStatus(state.cells, state.solution, mistakes),
+      hint: null,
+      flash: flash('rejected'),
+    };
+  }
 
   const cells = [...state.cells];
   const notes = [...state.notes];
   cells[index] = digit;
   notes[index] = 0;
-
-  const correct = digit === solutionAt(state, index);
-  if (correct) {
-    // A confirmed digit invalidates the same pencil mark in every peer cell.
-    for (const peer of PEERS[index]) notes[peer] &= ~noteBit(digit);
-  }
-
-  const mistakes = correct ? state.mistakes : state.mistakes + 1;
-  const status = resolveStatus(cells, state.solution, mistakes);
+  // A confirmed digit invalidates the same pencil mark in every peer cell.
+  for (const peer of PEERS[index]) notes[peer] &= ~noteBit(digit);
 
   return {
     ...next,
     cells,
     notes,
-    mistakes,
-    status,
+    status: resolveStatus(cells, state.solution, state.mistakes),
     hint: null,
-    history: pushHistory(state),
+    flash: flash('locked'),
   };
 }
 
+/** Placed digits are final, so erasing only ever clears pencil marks. */
 function applyErase(state: GameState): GameState {
   const index = state.selected;
   if (state.status !== 'playing' || index === null || isLocked(state, index)) return state;
-  if (state.cells[index] === EMPTY_CELL && state.notes[index] === 0) return state;
+  if (state.notes[index] === 0) return state;
 
-  const cells = [...state.cells];
   const notes = [...state.notes];
-  cells[index] = EMPTY_CELL;
   notes[index] = 0;
-  return { ...state, cells, notes, hint: null, history: pushHistory(state) };
+  return { ...state, notes, hint: null, history: pushHistory(state) };
 }
 
 /**
@@ -187,16 +207,6 @@ function applyErase(state: GameState): GameState {
  */
 function applyHint(state: GameState): GameState {
   if (state.status !== 'playing' || state.hintsLeft <= 0) return state;
-
-  const wrongIndex = state.cells.findIndex((_, index) => isWrong(state, index));
-  if (wrongIndex !== -1) {
-    return {
-      ...state,
-      selected: wrongIndex,
-      hintsLeft: state.hintsLeft - 1,
-      hint: { kind: 'wrong', index: wrongIndex, digit: state.cells[wrongIndex] },
-    };
-  }
 
   const step = findNextStep(state.cells);
   if (!step) return { ...state, hint: { kind: 'none' } };
@@ -234,24 +244,26 @@ function applyHint(state: GameState): GameState {
     status: resolveStatus(cells, state.solution, state.mistakes),
     hint: { kind: 'step', step },
     history: pushHistory(state),
+    flash: { index: placement.index, digit: placement.digit, kind: 'locked', id: nextFlashId(state) },
   };
 }
 
+/**
+ * Undo walks back pencil marks, nothing else: a placed digit is permanent and
+ * a life, once spent, stays spent.
+ */
 function applyUndo(state: GameState): GameState {
   const previous = state.history.at(-1);
   if (!previous || state.status !== 'playing') return state;
-  return {
-    ...state,
-    cells: previous.cells,
-    notes: previous.notes,
-    mistakes: previous.mistakes,
-    history: state.history.slice(0, -1),
-  };
+  return { ...state, notes: previous.notes, history: state.history.slice(0, -1) };
 }
 
-const isLocked = (state: GameState, index: number): boolean => state.givens[index] || state.hinted[index];
+/** Every digit that lands on the board is correct, so a filled cell is final. */
+const isLocked = (state: GameState, index: number): boolean => state.cells[index] !== EMPTY_CELL;
 
 const solutionAt = (state: GameState, index: number): number => Number(state.solution[index]);
+
+const nextFlashId = (state: GameState): number => (state.flash?.id ?? 0) + 1;
 
 function resolveStatus(cells: number[], solution: string, mistakes: number): GameStatus {
   if (mistakes >= MAX_MISTAKES) return 'lost';
@@ -259,14 +271,10 @@ function resolveStatus(cells: number[], solution: string, mistakes: number): Gam
 }
 
 function pushHistory(state: GameState): HistoryEntry[] {
-  const entry: HistoryEntry = { cells: state.cells, notes: state.notes, mistakes: state.mistakes };
-  return [...state.history, entry].slice(-MAX_HISTORY);
+  return [...state.history, { notes: state.notes }].slice(-MAX_HISTORY);
 }
 
 /* --- selectors --- */
-
-export const isWrong = (state: GameState, index: number): boolean =>
-  state.cells[index] !== EMPTY_CELL && state.cells[index] !== solutionAt(state, index);
 
 export const filledCount = (state: GameState): number =>
   state.cells.reduce((total, value) => total + (value === EMPTY_CELL ? 0 : 1), 0);
@@ -277,39 +285,40 @@ export const remainingForDigit = (state: GameState, digit: number): number =>
 export interface Highlight {
   /** Cells holding the active digit. */
   matches: Set<number>;
-  /** Cells on a row or column that contains the active digit. */
-  lines: Set<number>;
-  /** Row, column and box of the selected cell. */
+  /** Row and column of the selected cell. */
   related: Set<number>;
+  /** Digits the selected cell can already see on that row and column. */
+  placed: Set<number>;
 }
 
 /**
- * Highlight model: picking a digit lights every cell holding it plus the rows
- * and columns those cells sit in; selecting a cell lights its own units.
+ * Highlight model, deliberately stingy: a digit lights only the cells that hold
+ * it, and a selected cell lights its own row and column, marking the digits
+ * already standing there. Nothing on the board points at what is missing.
  */
 export function computeHighlight(state: GameState): Highlight {
   const matches = new Set<number>();
-  const lines = new Set<number>();
   const related = new Set<number>();
+  const placed = new Set<number>();
 
   if (state.activeDigit !== null) {
-    const rows = new Set<number>();
-    const cols = new Set<number>();
     state.cells.forEach((value, index) => {
-      if (value !== state.activeDigit) return;
-      matches.add(index);
-      rows.add(rowOf(index));
-      cols.add(colOf(index));
+      if (value === state.activeDigit) matches.add(index);
     });
-    for (let index = 0; index < CELL_COUNT; index += 1) {
-      if (rows.has(rowOf(index)) || cols.has(colOf(index))) lines.add(index);
-    }
   }
 
   if (state.selected !== null) {
-    related.add(state.selected);
-    for (const peer of PEERS[state.selected]) related.add(peer);
+    const row = rowOf(state.selected);
+    const col = colOf(state.selected);
+    for (let offset = 0; offset < SIZE; offset += 1) {
+      related.add(indexOf(row, offset));
+      related.add(indexOf(offset, col));
+    }
+    related.delete(state.selected);
+    for (const index of related) {
+      if (state.cells[index] !== EMPTY_CELL) placed.add(index);
+    }
   }
 
-  return { matches, lines, related };
+  return { matches, related, placed };
 }

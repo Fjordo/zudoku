@@ -6,8 +6,6 @@ import {
   filledCount,
   gameReducer,
   hasNote,
-  hintCells,
-  isWrong,
   remainingForDigit,
   type GameAction,
   type GameState,
@@ -45,18 +43,39 @@ describe('entering digits', () => {
 
     expect(state.cells[index]).toBe(solution[index]);
     expect(state.mistakes).toBe(0);
-    expect(isWrong(state, index)).toBe(false);
+    expect(state.flash).toMatchObject({ index, digit: solution[index], kind: 'locked' });
     expect(filledCount(state)).toBe(generated.clues + 1);
   });
 
-  it('counts a wrong digit and marks the cell', () => {
+  it('keeps a placed digit for good', () => {
     const start = newGame();
     const index = firstEmpty(start);
-    const state = run(start, { type: 'select', index }, { type: 'input', digit: wrongDigitFor(index) });
+    const placed = run(start, { type: 'select', index }, { type: 'input', digit: solution[index] });
+    const state = run(placed, { type: 'erase' }, { type: 'input', digit: wrongDigitFor(index) });
 
+    expect(state.cells[index]).toBe(solution[index]);
+    expect(state.mistakes).toBe(0);
+  });
+
+  it('refuses a wrong digit and leaves the cell empty', () => {
+    const start = newGame();
+    const index = firstEmpty(start);
+    const digit = wrongDigitFor(index);
+    const state = run(start, { type: 'select', index }, { type: 'input', digit });
+
+    expect(state.cells[index]).toBe(EMPTY_CELL);
     expect(state.mistakes).toBe(1);
-    expect(isWrong(state, index)).toBe(true);
+    expect(state.flash).toMatchObject({ index, digit, kind: 'rejected' });
     expect(state.status).toBe('playing');
+  });
+
+  it('drops the flash once the board has played it', () => {
+    const start = newGame();
+    const index = firstEmpty(start);
+    const rejected = run(start, { type: 'select', index }, { type: 'input', digit: wrongDigitFor(index) });
+    const state = run(rejected, { type: 'clear_flash', id: rejected.flash?.id ?? 0 });
+
+    expect(state.flash).toBeNull();
   });
 
   it('ends the game after three mistakes', () => {
@@ -117,7 +136,7 @@ describe('notes', () => {
       (value, other) => value === EMPTY_CELL && other !== index && rowOf(other) === rowOf(index),
     );
 
-    let state = run(
+    const state = run(
       start,
       { type: 'toggle_notes' },
       { type: 'select', index: peer },
@@ -128,8 +147,34 @@ describe('notes', () => {
     );
 
     expect(hasNote(state.notes[peer], digit)).toBe(false);
-    state = run(state, { type: 'undo' });
-    expect(state.cells[index]).toBe(EMPTY_CELL);
+  });
+});
+
+describe('undo', () => {
+  it('walks back a pencil mark', () => {
+    const start = newGame();
+    const index = firstEmpty(start);
+    const marked = run(start, { type: 'toggle_notes' }, { type: 'select', index }, { type: 'input', digit: 4 });
+    const state = run(marked, { type: 'undo' });
+
+    expect(hasNote(state.notes[index], 4)).toBe(false);
+    expect(state.history).toHaveLength(0);
+  });
+
+  it('never gives back a spent life', () => {
+    const start = newGame();
+    const index = firstEmpty(start);
+    const state = run(
+      start,
+      { type: 'toggle_notes' },
+      { type: 'select', index },
+      { type: 'input', digit: 4 },
+      { type: 'toggle_notes' },
+      { type: 'input', digit: wrongDigitFor(index) },
+      { type: 'undo' },
+    );
+
+    expect(state.mistakes).toBe(1);
   });
 });
 
@@ -145,20 +190,6 @@ describe('hints', () => {
     expect(state.cells[placed]).toBe(solution[placed]);
   });
 
-  it('asks the player to clear a wrong digit before continuing', () => {
-    const start = newGame();
-    const index = firstEmpty(start);
-    const state = run(
-      start,
-      { type: 'select', index },
-      { type: 'input', digit: wrongDigitFor(index) },
-      { type: 'hint' },
-    );
-
-    expect(state.hint).toEqual({ kind: 'wrong', index, digit: wrongDigitFor(index) });
-    expect(hintCells(state.hint)).toEqual([index]);
-  });
-
   it('stops giving hints once they run out', () => {
     let state = createGame({ puzzle: generated.puzzle, solution: generated.solution, hints: 0 });
     state = run(state, { type: 'hint' });
@@ -167,25 +198,42 @@ describe('hints', () => {
 });
 
 describe('highlight', () => {
-  it('lights matching cells and the lines they sit on', () => {
+  it('lights the cells holding the digit and nothing else', () => {
     const state = run(newGame(), { type: 'highlight', digit: 5 });
     const highlight = computeHighlight(state);
     const matches = [...highlight.matches];
 
     expect(matches.length).toBeGreaterThan(0);
-    for (const index of matches) {
-      expect(state.cells[index]).toBe(5);
-      // Every cell of a matched row is lit.
-      expect(highlight.lines.has(indexOf(rowOf(index), 0))).toBe(true);
-    }
+    for (const index of matches) expect(state.cells[index]).toBe(5);
+    // A cell sharing a row with a 5 stays dark unless it holds one itself.
+    const onSameRow = state.cells.findIndex(
+      (value, index) => value !== 5 && matches.some((match) => rowOf(match) === rowOf(index)),
+    );
+    expect(highlight.matches.has(onSameRow)).toBe(false);
   });
 
-  it('relates the selected cell to its own units', () => {
-    const state = run(newGame(), { type: 'select', index: indexOf(4, 4) });
+  it('reads the row and column of the selected cell', () => {
+    const selected = indexOf(4, 4);
+    const state = run(newGame(), { type: 'select', index: selected });
     const highlight = computeHighlight(state);
 
     expect(highlight.related.has(indexOf(4, 0))).toBe(true);
     expect(highlight.related.has(indexOf(0, 4))).toBe(true);
-    expect(highlight.related.has(indexOf(0, 0))).toBe(false);
+    // The box no longer counts, and neither does the cell itself.
+    expect(highlight.related.has(indexOf(3, 3))).toBe(false);
+    expect(highlight.related.has(selected)).toBe(false);
+
+    for (const index of highlight.placed) {
+      expect(highlight.related.has(index)).toBe(true);
+      expect(state.cells[index]).not.toBe(EMPTY_CELL);
+    }
+  });
+
+  it('puts no digit in play when an empty cell is selected', () => {
+    const start = newGame();
+    const state = run(start, { type: 'highlight', digit: 5 }, { type: 'select', index: firstEmpty(start) });
+
+    expect(state.activeDigit).toBeNull();
+    expect(computeHighlight(state).matches.size).toBe(0);
   });
 });

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { CELL_COUNT, DIGITS, EMPTY_CELL, SIZE, boxOf, colOf, rowOf } from '@zudoku/shared';
 import { useI18n } from '../../../i18n';
-import { hasNote, hintCells, isWrong, type GameState, type Highlight } from '../gameState';
+import { hasNote, hintCells, type Flash, type GameState, type Highlight } from '../gameState';
 
 interface BoardProps {
   state: GameState;
@@ -13,34 +13,41 @@ interface BoardProps {
 export function Board({ state, highlight, disabled, onSelect }: BoardProps) {
   const { t } = useI18n();
   const explained = new Set(hintCells(state.hint));
+  const flash = state.flash;
 
   return (
     <div className="board" role="grid" aria-label={t('game.boardLabel')}>
-      {Array.from({ length: CELL_COUNT }, (_, index) => (
-        <Cell
-          key={index}
-          index={index}
-          value={state.cells[index]}
-          notes={state.notes[index]}
-          given={state.givens[index]}
-          hinted={state.hinted[index]}
-          wrong={isWrong(state, index)}
-          selected={state.selected === index}
-          matched={highlight.matches.has(index)}
-          online={highlight.lines.has(index)}
-          related={highlight.related.has(index)}
-          explained={explained.has(index)}
-          activeDigit={state.activeDigit}
-          focusable={(state.selected ?? 0) === index}
-          label={t('game.cellLabel', {
-            row: rowOf(index) + 1,
-            column: colOf(index) + 1,
-            value: state.cells[index] || t('game.cellEmpty'),
-          })}
-          disabled={disabled}
-          onSelect={onSelect}
-        />
-      ))}
+      {Array.from({ length: CELL_COUNT }, (_, index) => {
+        // A rejected digit is never stored: the cell borrows it for the animation.
+        const flashing = flash?.index === index ? flash : null;
+        const value = flashing?.kind === 'rejected' ? flashing.digit : state.cells[index];
+        return (
+          <Cell
+            key={index}
+            index={index}
+            value={value}
+            notes={state.notes[index]}
+            given={state.givens[index]}
+            hinted={state.hinted[index]}
+            selected={state.selected === index}
+            matched={highlight.matches.has(index)}
+            related={highlight.related.has(index)}
+            placed={highlight.placed.has(index)}
+            explained={explained.has(index)}
+            flash={flashing?.kind ?? null}
+            flashId={flashing?.id ?? 0}
+            activeDigit={state.activeDigit}
+            focusable={(state.selected ?? 0) === index}
+            label={t('game.cellLabel', {
+              row: rowOf(index) + 1,
+              column: colOf(index) + 1,
+              value: state.cells[index] || t('game.cellEmpty'),
+            })}
+            disabled={disabled}
+            onSelect={onSelect}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -51,13 +58,17 @@ interface CellProps {
   notes: number;
   given: boolean;
   hinted: boolean;
-  wrong: boolean;
   selected: boolean;
   matched: boolean;
-  /** Sits on a row, column or box that contains the highlighted digit. */
-  online: boolean;
+  /** Sits on the row or column of the selected cell. */
   related: boolean;
+  /** Holds a digit the selected cell can already see. */
+  placed: boolean;
   explained: boolean;
+  /** Animation the cell is playing: a digit seating for good, or one bouncing off. */
+  flash: Flash['kind'] | null;
+  /** Remounts the digit so a repeated flash replays instead of freezing. */
+  flashId: number;
   /** Digit currently in play: its pencil marks light across the grid. */
   activeDigit: number | null;
   /** Roving tabindex: the grid is a single tab stop, arrows move inside it. */
@@ -74,12 +85,13 @@ const Cell = memo(function Cell({
   notes,
   given,
   hinted,
-  wrong,
   selected,
   matched,
-  online,
   related,
+  placed,
   explained,
+  flash,
+  flashId,
   activeDigit,
   focusable,
   disabled,
@@ -90,12 +102,13 @@ const Cell = memo(function Cell({
     'cell',
     given && 'cell--given',
     hinted && 'cell--hinted',
-    wrong && 'cell--wrong',
     selected && 'cell--selected',
     matched && 'cell--matched',
-    online && 'cell--online',
     related && 'cell--related',
+    placed && 'cell--placed',
     explained && 'cell--explained',
+    flash === 'locked' && 'cell--locked',
+    flash === 'rejected' && 'cell--rejected',
     colOf(index) % 3 === 2 && colOf(index) !== SIZE - 1 && 'cell--edge-right',
     rowOf(index) % 3 === 2 && rowOf(index) !== SIZE - 1 && 'cell--edge-bottom',
   ]
@@ -115,7 +128,9 @@ const Cell = memo(function Cell({
       onClick={() => onSelect(index)}
     >
       {value !== EMPTY_CELL ? (
-        <span className="cell__value">{value}</span>
+        <span key={flashId} className="cell__value">
+          {value}
+        </span>
       ) : notes !== 0 ? (
         <span className="cell__notes" aria-hidden="true">
           {DIGITS.map((digit) => (

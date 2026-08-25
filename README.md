@@ -10,8 +10,10 @@ Interface available in English and Italian; the code, comments and commit histor
 **Solo**
 
 - Easy / medium / hard, graded by the solving techniques a puzzle actually requires.
-- Timer with pause, three mistakes allowed, notes (pencil marks), undo, erase.
-- Tapping a digit lights every cell holding it and the rows and columns those cells sit on.
+- Timer with pause and three mistakes allowed. A correct digit seats for good; a wrong one is shaken
+  off and costs a life, so undo and erase act on the pencil marks and never on a spent life.
+- Tapping a digit lights every cell holding it. Tapping an empty cell marks the digits its own row and
+  column already hold, and never points at what is missing.
 - Hints explain the technique behind the next move instead of just revealing a digit.
 - Games are saved locally, so a reload or an offline session resumes where it left off.
 

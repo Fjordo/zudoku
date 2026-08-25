@@ -1,6 +1,8 @@
 /*
- * The board is the signature: a dark plate where the digit you pick lights the
- * cells that hold it and washes the rows and columns they sit on.
+ * The board is the signature: a dark plate that lights only what you already
+ * know. The digit you pick lights the cells holding it, the cell you pick lights
+ * the digits its row and column can see, and the plate itself answers an entry —
+ * seating a correct digit for good, shaking a wrong one off.
  */
 
 .game__layout {
@@ -254,14 +256,21 @@
   color: var(--beam);
 }
 
-/* Peers of the selected cell: lifted, not lit. */
+/* The row and column of the selected cell: lifted, not lit. */
 .cell--related {
   background: color-mix(in srgb, var(--bone) 7%, var(--plate));
 }
 
-/* Rows and columns that contain the highlighted digit. */
-.cell--online {
-  background: color-mix(in srgb, var(--beam) 10%, var(--plate));
+/*
+ * Digits that row and column already hold, underscored like readings on a
+ * scale. The board states what is there and never what is missing.
+ */
+.cell--placed {
+  background-color: color-mix(in srgb, var(--bone) 14%, var(--plate));
+  background-image: linear-gradient(to right, color-mix(in srgb, currentcolor 70%, transparent) 0 100%);
+  background-repeat: no-repeat;
+  background-size: 42% 2px;
+  background-position: center calc(100% - 12%);
 }
 
 .cell--matched {
@@ -288,9 +297,97 @@
   color: #10131c;
 }
 
-.cell--wrong {
+/*
+ * The plate answers every entry, and these two answers are the only moment the
+ * board moves. A correct digit strikes like a filament and seats: it is now
+ * part of the puzzle and cannot be taken back.
+ */
+.cell--locked .cell__value {
+  animation: seat 460ms cubic-bezier(0.16, 1.2, 0.3, 1) both;
+}
+
+.cell--locked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: seat-ring 460ms ease-out both;
+}
+
+@keyframes seat {
+  from {
+    transform: scale(1.5);
+    opacity: 0.2;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes seat-ring {
+  from {
+    background: color-mix(in srgb, var(--lamp) 30%, transparent);
+    box-shadow:
+      inset 0 0 0 2px color-mix(in srgb, var(--lamp) 80%, transparent),
+      0 0 18px color-mix(in srgb, var(--lamp) 45%, transparent);
+  }
+
+  to {
+    background: transparent;
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}
+
+/* A wrong digit is refused: it flares, is shaken off and leaves the cell as it was. */
+.cell--rejected {
   color: var(--flare);
-  background: color-mix(in srgb, var(--flare) 20%, var(--plate));
+  /* Also the resting state, so the refusal still reads without the animation. */
+  background: color-mix(in srgb, var(--flare) 34%, var(--plate));
+  animation: reject-plate 580ms ease-out both;
+}
+
+.cell--rejected .cell__value {
+  animation: reject 580ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes reject-plate {
+  from {
+    background: color-mix(in srgb, var(--flare) 34%, var(--plate));
+  }
+
+  to {
+    background: var(--plate);
+  }
+}
+
+@keyframes reject {
+  0% {
+    transform: translateX(0) scale(1.2);
+  }
+
+  14% {
+    transform: translateX(-1cqw) scale(1.1);
+  }
+
+  30% {
+    transform: translateX(1cqw);
+  }
+
+  46% {
+    transform: translateX(-0.7cqw);
+  }
+
+  62% {
+    transform: translateX(0.4cqw) scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(0) scale(0.5);
+    opacity: 0;
+  }
 }
 
 .cell--explained {
@@ -333,7 +430,6 @@
 }
 
 /* Notes stay legible on every lit state a cell can take. */
-.cell--online .cell__notes,
 .cell--related .cell__notes {
   color: color-mix(in srgb, var(--bone) 84%, transparent);
 }
@@ -553,6 +649,7 @@
     min-height: 52px;
     font-size: 0.72rem;
   }
+
 }
 
 /* Touch phones: the shortcut list names keys the device does not have. */
