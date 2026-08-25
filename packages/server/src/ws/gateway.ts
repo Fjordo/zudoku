@@ -8,7 +8,7 @@ import {
 } from '@zudoku/shared';
 import { config } from '../config.js';
 import { logger } from '../logger.js';
-import { RoomFailure, type Room } from '../rooms/room.js';
+import { RoomFailure, type Player, type Room } from '../rooms/room.js';
 import type { RoomManager } from '../rooms/roomManager.js';
 import { parseClientMessage } from './parseMessage.js';
 
@@ -98,11 +98,22 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   const enterRoom = (socket: WebSocket, session: Session, message: ClientMessage): void => {
     if (message.type !== 'create_room' && message.type !== 'join_room') return;
 
-    // One socket holds one seat. Without this the abandoned room kept a player
-    // marked connected that nothing would ever disconnect, so the sweeper never
-    // collected it and every extra create_room leaked a room for good.
     const target = message.type === 'join_room' ? normalizeRoomCode(message.code) : null;
-    if (session.roomCode !== null && session.roomCode !== target) leaveCurrentRoom(session);
+
+    // One socket holds one seat. Re-entering the room this socket already sits
+    // in returns that same seat: allocating a second one overwrote the previous
+    // playerId, so nothing would ever disconnect it. The abandoned player stayed
+    // marked connected, which kept the room out of the sweeper's reach for good,
+    // held the host role hostage and filled the room against real players.
+    if (session.roomCode !== null && session.roomCode === target) {
+      const current = rooms.find(target);
+      const seat = current && session.playerId ? current.getPlayer(session.playerId) : undefined;
+      if (current && seat) {
+        admit(socket, session, current, seat);
+        return;
+      }
+    }
+    if (session.roomCode !== null) leaveCurrentRoom(session);
 
     if (message.type === 'create_room') {
       const created = rooms.create();
@@ -110,7 +121,9 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
         fail(socket, 'server_busy', 'The server is at capacity, try again shortly.');
         return;
       }
-      admit(socket, session, created, message);
+      const host = created.join(message.name);
+      created.setDifficulty(host.id, message.difficulty);
+      admit(socket, session, created, host);
       return;
     }
 
@@ -119,18 +132,10 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
       fail(socket, 'room_not_found', 'This room code does not exist.');
       return;
     }
-    admit(socket, session, room, message);
+    admit(socket, session, room, room.join(message.name, message.sessionToken));
   };
 
-  const admit = (
-    socket: WebSocket,
-    session: Session,
-    room: Room,
-    message: Extract<ClientMessage, { type: 'create_room' | 'join_room' }>,
-  ): void => {
-    const player = room.join(message.name, message.type === 'join_room' ? message.sessionToken : undefined);
-    if (message.type === 'create_room') room.setDifficulty(player.id, message.difficulty);
-
+  const admit = (socket: WebSocket, session: Session, room: Room, player: Player): void => {
     session.roomCode = room.code;
     session.playerId = player.id;
     send(socket, {

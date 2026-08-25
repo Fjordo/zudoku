@@ -1,5 +1,5 @@
 import { createServer, type Server } from 'node:http';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import WebSocket from 'ws';
 import {
   gridToString,
@@ -154,6 +154,28 @@ describe('websocket gateway', () => {
     expect(rooms.size).toBe(1);
 
     client.close();
+  });
+
+  it('hands back the same seat when a socket re-enters the room it is already in', async () => {
+    const client = await TestClient.connect();
+    client.send({ type: 'create_room', name: 'Ada', difficulty: 'easy' });
+    const first = await client.next('joined');
+    const code = first.room.code;
+
+    client.forget();
+    client.send({ type: 'join_room', code, name: 'Ada' });
+    const again = await client.next('joined');
+
+    // A second seat would leave behind a player nothing ever disconnects: it
+    // stayed marked connected, so it filled the room, kept the host role and
+    // put the room permanently out of the sweeper's reach.
+    expect(again.playerId).toBe(first.playerId);
+    expect(again.room.players).toHaveLength(1);
+
+    client.close();
+    await vi.waitFor(() => expect(rooms.find(code)?.playerCount).toBe(0));
+    rooms.sweep();
+    expect(rooms.find(code)).toBeUndefined();
   });
 
   it('throttles a burst of room creations from one socket', async () => {
