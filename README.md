@@ -112,13 +112,26 @@ room registry to a shared store before scaling out. `/healthz` reports status, r
 | `ROOM_TTL_MS` | `1800000` | How long an empty room survives before the sweeper drops it. |
 | `MAX_ROOMS` | `2000` | Ceiling on live rooms; past it `create_room` answers `server_busy`. |
 | `ALLOWED_ORIGINS` | same host | Comma-separated origins allowed to open a room socket, when the client is served from elsewhere. |
+| `MAX_SOCKETS_PER_ADDRESS` | `12` | Concurrent room sockets one address may hold open. |
+| `TRUST_PROXY` | off | Set to `1` behind a proxy that overwrites `Fly-Client-IP` / `X-Forwarded-For`, so the per-address limits see the real client. Leave it off otherwise: a client would pick its own identity. |
+| `PUZZLE_POOL_SIZE` | `8` | Warm puzzles kept ready per difficulty. |
 
 ## Limits
 
-Untrusted input reaches the server only through the room socket, so that is where the limits sit:
-frames are capped at 16 KB, every connection gets 30 messages a second, and the actions that
-allocate a room or generate a puzzle get a tighter budget of their own (6 per 10 seconds per
-connection, 10 a second across the server) because generation is synchronous. Room codes come from
-the CSPRNG, the handshake checks the Origin, and finishing a race is validated server-side against
-the puzzle rather than trusted from the client. Progress and mistake counts are still self-reported,
-so the standings are only as honest as the players.
+Untrusted input reaches the server only through the room socket, so that is where the limits sit.
+Frames are capped at 16 KB and every connection gets 30 messages a second. The actions that allocate
+a room or a seat in one get a tighter budget of their own: 6 per 10 seconds per connection, 20 per 10
+seconds per address, and 60 a second across the server. The budgets are layered that way on purpose —
+a per-connection limit alone is bypassed by opening more connections, and a server-wide limit low
+enough for one client to exhaust turns the limiter into the outage, because everyone else then gets
+`rate_limited`. For the same reason a refused action is not charged to any of the three, and an
+address may hold only 12 sockets open at once.
+
+Puzzle generation is synchronous and costs tens of milliseconds, so it never runs on the path of an
+inbound message: a pool generates puzzles on a timer and a race takes one that is already waiting. An
+empty pool answers `server_busy` instead of generating inline, which is what keeps the event loop out
+of reach of a `start_game` flood.
+
+Room codes come from the CSPRNG, the handshake checks the Origin, and finishing a race is validated
+server-side against the puzzle rather than trusted from the client. Progress and mistake counts are
+still self-reported, so the standings are only as honest as the players.
