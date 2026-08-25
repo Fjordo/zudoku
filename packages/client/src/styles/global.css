@@ -27,7 +27,6 @@
   --radius: 14px;
   --radius-lg: 20px;
   --shadow: 0 20px 44px rgb(6 4 14 / 55%);
-  --glow: 0 0 18px color-mix(in srgb, var(--accent) 32%, transparent);
 
   --space-1: 4px;
   --space-2: 8px;
@@ -221,7 +220,8 @@ p {
   background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #ffffff), var(--accent));
   border-color: transparent;
   color: #140f22;
-  box-shadow: var(--glow);
+  /* Lit in the accent of the surface it sits on, so challenge screens glow magenta. */
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 32%, transparent);
 }
 
 .button--primary:hover:not(:disabled) {
@@ -258,8 +258,11 @@ p {
   font: inherit;
 }
 
-.input:focus-visible,
-.button:focus-visible {
+/*
+ * One focus ring for every control in the app, wherever it lives. Zero
+ * specificity, so a component that needs its own ring (the board cells) wins.
+ */
+:where(a, button, input, select, textarea):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -305,7 +308,8 @@ p {
   border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   background: color-mix(in srgb, var(--accent) 18%, var(--surface));
   color: var(--bone);
-  box-shadow: var(--glow);
+  /* Lit in the accent of the surface it sits on, so challenge screens glow magenta. */
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 32%, transparent);
 }
 
 .badge {
