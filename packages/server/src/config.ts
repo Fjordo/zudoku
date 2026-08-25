@@ -27,13 +27,17 @@ export const config = {
   allowedOrigins: originList(process.env.ALLOWED_ORIGINS),
   maxMessagesPerSecond: 30,
   /**
-   * Creating a room and starting a game allocate memory and block the event
-   * loop on puzzle generation, so they get a much tighter budget of their own.
+   * Creating a room and joining one allocate memory, so they get a much tighter
+   * budget of their own. Starting a game is charged the same way even though the
+   * puzzle it hands out is pre-generated (see `PuzzlePool`).
    */
   maxCostlyActionsPerWindow: 6,
   costlyActionWindowMs: 10 * 1000,
   /** Same budget across every connection, so a fleet of sockets cannot stall the loop. */
   maxCostlyActionsPerSecond: 10,
+  /** Warm puzzles kept ready per difficulty, and how often one is generated. */
+  puzzlePoolSize: Number(process.env.PUZZLE_POOL_SIZE ?? 8),
+  puzzlePoolRefillMs: 500,
   /** Hard ceiling on live rooms: a flood degrades into an error, not an OOM. */
   maxRooms: Number(process.env.MAX_ROOMS ?? 2000),
   /** Largest accepted WebSocket frame. Every protocol message is a few hundred bytes. */

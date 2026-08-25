@@ -37,7 +37,12 @@ export const defaultRoomDeps: RoomDeps = {
   createPuzzle: (difficulty) => generatePuzzle(difficulty),
 };
 
-export type RoomErrorCode = 'room_full' | 'room_in_progress' | 'invalid_solution' | 'not_host';
+export type RoomErrorCode =
+  | 'room_full'
+  | 'room_in_progress'
+  | 'invalid_solution'
+  | 'not_host'
+  | 'server_busy';
 
 export class RoomFailure extends Error {
   constructor(readonly code: RoomErrorCode) {

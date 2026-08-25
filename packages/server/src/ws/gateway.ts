@@ -24,7 +24,7 @@ interface Session {
   costlyActions: number;
 }
 
-/** Actions that allocate a room or generate a puzzle, both far from free. */
+/** Actions that allocate a room or a seat in one, neither of them free. */
 const COSTLY_ACTIONS: ReadonlySet<ClientMessage['type']> = new Set([
   'create_room',
   'join_room',
@@ -344,6 +344,8 @@ const describe = (code: ServerErrorCode): string => {
       return 'Only the host can do that.';
     case 'invalid_solution':
       return 'That grid is not a valid solution.';
+    case 'server_busy':
+      return 'The server is at capacity, try again shortly.';
     default:
       return 'Request rejected.';
   }

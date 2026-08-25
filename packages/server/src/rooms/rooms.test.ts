@@ -45,6 +45,20 @@ describe('Room', () => {
     expect(room.snapshot().players.every((player) => player.status === 'playing')).toBe(true);
   });
 
+  it('leaves the lobby untouched when no puzzle can be handed out', () => {
+    const { deps } = createDeps({
+      createPuzzle: () => {
+        throw new RoomFailure('server_busy');
+      },
+    });
+    const room = new Room('ABC123', deps);
+    const host = room.join('Ada');
+
+    expect(() => room.start(host.id)).toThrow('server_busy');
+    expect(room.status).toBe('lobby');
+    expect(room.puzzle).toBeNull();
+  });
+
   it('rejects joining a room in progress but allows reconnecting with a token', () => {
     const { deps } = createDeps();
     const room = new Room('ABC123', deps);
