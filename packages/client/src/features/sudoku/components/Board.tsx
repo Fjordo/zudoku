@@ -30,6 +30,7 @@ export function Board({ state, highlight, disabled, onSelect }: BoardProps) {
           online={highlight.lines.has(index)}
           related={highlight.related.has(index)}
           explained={explained.has(index)}
+          activeDigit={state.activeDigit}
           focusable={(state.selected ?? 0) === index}
           label={t('game.cellLabel', {
             row: rowOf(index) + 1,
@@ -57,6 +58,8 @@ interface CellProps {
   online: boolean;
   related: boolean;
   explained: boolean;
+  /** Digit currently in play: its pencil marks light across the grid. */
+  activeDigit: number | null;
   /** Roving tabindex: the grid is a single tab stop, arrows move inside it. */
   focusable: boolean;
   disabled: boolean;
@@ -77,6 +80,7 @@ const Cell = memo(function Cell({
   online,
   related,
   explained,
+  activeDigit,
   focusable,
   disabled,
   label,
@@ -115,7 +119,10 @@ const Cell = memo(function Cell({
       ) : notes !== 0 ? (
         <span className="cell__notes" aria-hidden="true">
           {DIGITS.map((digit) => (
-            <span key={digit} className="cell__note">
+            <span
+              key={digit}
+              className={digit === activeDigit ? 'cell__note cell__note--active' : 'cell__note'}
+            >
               {hasNote(notes, digit) ? digit : ''}
             </span>
           ))}

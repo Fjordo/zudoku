@@ -54,9 +54,11 @@ export function GameScreen({
 
       <div className="game__layout">
         <div className="game__main">
-          <div className="board__frame">
-            <Board state={state} highlight={highlight} disabled={disabled} onSelect={game.select} />
-            {overlay}
+          <div className="game__board">
+            <div className="board__frame">
+              <Board state={state} highlight={highlight} disabled={disabled} onSelect={game.select} />
+              {overlay}
+            </div>
           </div>
           {/* The hint sits with the keypad so showing it never reflows the board. */}
           <div className="game__input">

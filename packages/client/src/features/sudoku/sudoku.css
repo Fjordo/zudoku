@@ -156,11 +156,24 @@
 
 /* --- board --- */
 
+/*
+ * The board gets its own row so that on phones it can break out of the page
+ * gutter while the keypad below keeps it.
+ */
+.game__board {
+  display: block;
+}
+
 .board__frame {
   position: relative;
   /* Own stacking context: cell z-indexes stay local and never cover the overlay. */
   isolation: isolate;
-  width: min(100%, 68vh, calc(100dvh - 300px));
+  /*
+   * Everything above and below the board in the stacked layout, in one place:
+   * the board takes whatever height is left over.
+   */
+  --board-reserve: 300px;
+  width: min(100%, 68vh, 100dvh - var(--board-reserve));
   margin: 0 auto;
   transition: width 160ms ease;
 }
@@ -171,7 +184,7 @@
  */
 @media (max-width: 860px) and (orientation: portrait) {
   .game--hinted .board__frame {
-    width: min(100%, 68vh, calc(100dvh - 380px));
+    --board-reserve: 380px;
   }
 }
 
@@ -213,7 +226,7 @@
   /* Amber is what you wrote; bone is what the puzzle came with. */
   color: var(--lamp);
   font-family: var(--font-mono);
-  font-size: 5.4cqw;
+  font-size: 6cqw;
   font-weight: 600;
   transition: background 110ms ease;
 }
@@ -301,10 +314,15 @@
   grid-template-columns: repeat(3, 1fr);
   width: 100%;
   height: 100%;
-  padding: 2px;
-  font-size: 2cqw;
-  font-weight: 500;
-  color: var(--text-muted);
+  padding: 1px;
+  /*
+   * Pencil marks are read at a glance, not studied: they scale with the board
+   * and never drop below the size a phone can still resolve.
+   */
+  font-size: clamp(9px, 3.2cqw, 16px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: color-mix(in srgb, var(--text-muted) 72%, var(--bone));
 }
 
 .cell__note {
@@ -312,6 +330,26 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+}
+
+/* Notes stay legible on every lit state a cell can take. */
+.cell--online .cell__notes,
+.cell--related .cell__notes {
+  color: color-mix(in srgb, var(--bone) 84%, transparent);
+}
+
+.cell--selected .cell__notes {
+  color: color-mix(in srgb, #10131c 82%, transparent);
+}
+
+/* The note for the digit in play lights like the cells that already hold it. */
+.cell__note--active {
+  color: var(--beam);
+  font-weight: 700;
+}
+
+.cell--selected .cell__note--active {
+  color: #10131c;
 }
 
 /* --- number pad --- */
@@ -436,6 +474,94 @@
   color: var(--bone);
 }
 
+/*
+ * Phones: the grid is the only element allowed to touch the screen edge.
+ * It reclaims the page gutter, the chrome around it gives back what it can,
+ * and the board spends every pixel of both.
+ */
+@media (max-width: 600px) {
+  .page.game {
+    --page-gutter: var(--space-2);
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-4);
+  }
+
+  .game .topbar {
+    min-height: 40px;
+  }
+
+  .game .topbar__title {
+    font-size: 0.98rem;
+  }
+
+  .game .stat {
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .game .stat__label {
+    font-size: 0.58rem;
+    letter-spacing: 0.07em;
+  }
+
+  .game .stat__value {
+    font-size: 0.88rem;
+  }
+
+  .game__main {
+    gap: var(--space-2);
+  }
+
+  .game__input {
+    gap: var(--space-2);
+    padding: var(--space-1) 0 calc(var(--space-2) + env(safe-area-inset-bottom));
+  }
+
+  /* Full bleed: the board spans the device, gutter to gutter. */
+  .game__board {
+    margin-inline: calc(-1 * var(--page-gutter));
+  }
+
+  .board__frame {
+    --board-reserve: 252px;
+  }
+
+  .game--hinted .board__frame {
+    --board-reserve: 332px;
+  }
+
+  /*
+   * At the screen edge a rounded plate reads as a card that outgrew its page,
+   * so the corners go square. The hairline frame stays on all four sides: it is
+   * what keeps the outer cells from looking cut off when the board is short
+   * enough to sit inset.
+   */
+  .board {
+    padding: 2px;
+    border-radius: 0;
+  }
+
+  .pad {
+    gap: 5px;
+  }
+
+  .pad__key {
+    min-height: 50px;
+  }
+
+  .controls__button {
+    min-height: 52px;
+    font-size: 0.72rem;
+  }
+}
+
+/* Touch phones: the shortcut list names keys the device does not have. */
+@media (max-width: 600px) and (pointer: coarse) {
+  .game__keyboard-help {
+    display: none;
+  }
+}
+
 /* Landscape phones: board on the left, input on the right, nothing scrolls. */
 @media (max-height: 560px) and (orientation: landscape) {
   .page.game {
@@ -455,15 +581,32 @@
     font-size: 0.58rem;
   }
 
+  .game .stat__value {
+    font-size: 0.85rem;
+  }
+
+  /* Every row of chrome pays for itself in board height here. */
+  .game .topbar .button {
+    min-height: 36px;
+  }
+
+  .game .language__option {
+    min-height: 32px;
+  }
+
   .game__main {
     flex-direction: row;
     align-items: flex-start;
     gap: var(--space-3);
   }
 
+  .game__board {
+    margin-inline: 0;
+  }
+
   .board__frame,
   .game--hinted .board__frame {
-    width: min(48vw, calc(100dvh - 150px));
+    width: min(52vw, calc(100dvh - 116px));
     margin: 0;
   }
 

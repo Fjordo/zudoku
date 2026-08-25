@@ -36,6 +36,9 @@
   --space-5: 24px;
   --space-6: 32px;
 
+  /* Side gutter of every page. The game page hands it to the board on phones. */
+  --page-gutter: var(--space-4);
+
   --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
@@ -97,7 +100,7 @@ p {
   max-width: 720px;
   width: 100%;
   margin: 0 auto;
-  padding: var(--space-4) var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--page-gutter) var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
