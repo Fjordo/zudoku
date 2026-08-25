@@ -103,5 +103,22 @@ fly deploy
 ```
 
 The server keeps rooms in memory, so run a single machine (`min_machines_running = 1`) or move the
-room registry to a shared store before scaling out. `PORT`, `HOST`, `CLIENT_DIR` and `ROOM_TTL_MS`
-are the available environment variables; `/healthz` reports status, room count and uptime.
+room registry to a shared store before scaling out. `/healthz` reports status, room count and uptime.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `PORT` / `HOST` | `8080` / `0.0.0.0` | Listen address. |
+| `CLIENT_DIR` | `packages/client/dist` | Built client to serve. |
+| `ROOM_TTL_MS` | `1800000` | How long an empty room survives before the sweeper drops it. |
+| `MAX_ROOMS` | `2000` | Ceiling on live rooms; past it `create_room` answers `server_busy`. |
+| `ALLOWED_ORIGINS` | same host | Comma-separated origins allowed to open a room socket, when the client is served from elsewhere. |
+
+## Limits
+
+Untrusted input reaches the server only through the room socket, so that is where the limits sit:
+frames are capped at 16 KB, every connection gets 30 messages a second, and the actions that
+allocate a room or generate a puzzle get a tighter budget of their own (6 per 10 seconds per
+connection, 10 a second across the server) because generation is synchronous. Room codes come from
+the CSPRNG, the handshake checks the Origin, and finishing a race is validated server-side against
+the puzzle rather than trusted from the client. Progress and mistake counts are still self-reported,
+so the standings are only as honest as the players.
