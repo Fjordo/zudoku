@@ -27,6 +27,22 @@ Interface available in English and Italian; the code, comments and commit histor
 - Installable PWA, offline-capable for solo play, mobile-first layout with a landscape mode.
 - Keyboard support: `1`-`9`, arrows, `Backspace`, `N` for notes, `H` for a hint.
 
+## Theme
+
+The board is a dark plate lit by the digit in play, and colour carries meaning rather than
+decoration:
+
+| Token | Colour | Meaning |
+| --- | --- | --- |
+| `--bone` | `#f2ecdf` | clues the puzzle came with |
+| `--lamp` | `#ffb43f` | digits you entered, and the notes toggle |
+| `--beam` | `#5fe3d0` | light: highlighted digit, hints, solo mode |
+| `--flare` | `#ff5d8f` | mistakes, eliminations, challenge mode |
+
+Type: Bricolage Grotesque for display, JetBrains Mono for grid digits, timers and room codes,
+system sans for body copy. Both webfonts are bundled, so the installed app keeps its typography
+offline and makes no third-party request.
+
 ## Repository layout
 
 ```

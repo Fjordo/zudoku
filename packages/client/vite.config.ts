@@ -15,8 +15,8 @@ export default defineConfig({
         short_name: 'Zudoku',
         description: 'Play sudoku solo or race your friends on the same puzzle.',
         lang: 'en',
-        theme_color: '#0f1420',
-        background_color: '#0f1420',
+        theme_color: '#12101c',
+        background_color: '#12101c',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
@@ -30,6 +30,7 @@ export default defineConfig({
       workbox: {
         // Solo play is fully client-side, so the shell is precached for offline use.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/ws/, /^\/healthz/],
         cleanupOutdatedCaches: true,

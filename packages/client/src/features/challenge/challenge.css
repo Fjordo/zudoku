@@ -1,4 +1,4 @@
-/* Lobby, invite card and live standings. */
+/* Lobby, invite plate and live standings. */
 
 .invite {
   align-items: center;
@@ -6,16 +6,26 @@
 }
 
 .invite__code {
-  font-size: clamp(2rem, 12vw, 3rem);
-  letter-spacing: 0.25em;
+  font-family: var(--font-mono);
+  font-size: clamp(1.9rem, 11vw, 2.7rem);
+  letter-spacing: 0.22em;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--bone);
+  /* The code is the thing you read out loud: lit like a marquee. */
+  text-shadow: 0 0 26px color-mix(in srgb, var(--flare) 55%, transparent);
+  /* Balances the trailing letter-spacing so the code stays centred. */
+  text-indent: 0.22em;
+}
+
+.invite__actions {
+  justify-content: center;
 }
 
 .code-input {
-  letter-spacing: 0.3em;
+  font-family: var(--font-mono);
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .players {
@@ -33,8 +43,9 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--ink) 45%, var(--surface));
 }
 
 .players__row--stacked {
@@ -55,33 +66,37 @@
   align-items: center;
   gap: var(--space-2);
   font-weight: 600;
+  color: var(--bone);
 }
 
 .players__ready {
-  color: var(--success);
-  font-size: 0.85rem;
+  color: var(--beam);
+  font-size: 0.82rem;
   font-weight: 600;
 }
 
 .badge--win {
-  border-color: var(--success);
-  color: var(--success);
+  border-color: color-mix(in srgb, var(--lamp) 60%, transparent);
+  background: color-mix(in srgb, var(--lamp) 18%, transparent);
+  color: var(--lamp);
 }
 
 .progress {
   height: 6px;
   border-radius: 999px;
-  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--ink) 70%, var(--surface));
   overflow: hidden;
 }
 
 .progress__bar {
   display: block;
   height: 100%;
-  background: var(--accent);
-  transition: width 200ms ease;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--beam) 70%, transparent), var(--beam));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--beam) 45%, transparent);
+  transition: width 220ms ease;
 }
 
 .progress__bar--out {
-  background: var(--danger);
+  background: var(--flare);
+  box-shadow: none;
 }

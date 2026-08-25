@@ -41,7 +41,7 @@ export function GameScreen({
   const disabled = locked || state.status !== 'playing';
 
   return (
-    <div className="page page--wide game">
+    <div className={state.hint ? 'page page--wide game game--hinted' : 'page page--wide game'}>
       <header className="topbar">
         <button type="button" className="button button--ghost" onClick={onExit}>
           {t('common.back')}
@@ -52,21 +52,23 @@ export function GameScreen({
 
       <GameStats difficulty={difficulty} elapsedMs={elapsedMs} mistakes={state.mistakes} progress={filled} />
 
-      {state.hint && (
-        <HintBanner
-          hint={state.hint}
-          onDismiss={() => game.dispatch({ type: 'dismiss_hint' })}
-          onLearnMore={onLearnMore}
-        />
-      )}
-
       <div className="game__layout">
         <div className="game__main">
-          <div className="board__frame">
-            <Board state={state} highlight={highlight} disabled={disabled} onSelect={game.select} />
-            {overlay}
+          <div className="game__board">
+            <div className="board__frame">
+              <Board state={state} highlight={highlight} disabled={disabled} onSelect={game.select} />
+              {overlay}
+            </div>
           </div>
+          {/* The hint sits with the keypad so showing it never reflows the board. */}
           <div className="game__input">
+            {state.hint && (
+              <HintBanner
+                hint={state.hint}
+                onDismiss={() => game.dispatch({ type: 'dismiss_hint' })}
+                onLearnMore={onLearnMore}
+              />
+            )}
             <NumberPad state={state} disabled={disabled} onInput={game.input} />
             <GameControls
               notesMode={state.notesMode}

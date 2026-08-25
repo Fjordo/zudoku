@@ -114,7 +114,7 @@ export function SoloGame({
           <button type="button" className="button button--block" onClick={onNewGame}>
             {t('game.newPuzzle')}
           </button>
-          <p className="small muted">{t('game.keyboardHelp')}</p>
+          <p className="small muted game__keyboard-help">{t('game.keyboardHelp')}</p>
         </div>
       }
     />

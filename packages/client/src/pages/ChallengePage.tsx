@@ -46,7 +46,7 @@ export function ChallengePage({ code, navigate }: ChallengePageProps) {
   }
 
   return (
-    <div className="page">
+    <div className="page page--challenge">
       <header className="topbar">
         <button type="button" className="button button--ghost" onClick={leave}>
           {t('common.back')}

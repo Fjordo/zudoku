@@ -26,7 +26,7 @@ export function HomePage({ navigate }: HomePageProps) {
         <p className="muted">{t('home.tagline')}</p>
       </div>
 
-      <section className="card stack">
+      <section className="card card--solo stack">
         <h2 className="section-title">{t('home.solo')}</h2>
         <div className="field">
           <span className="field__label">{t('home.difficulty')}</span>
@@ -59,10 +59,10 @@ export function HomePage({ navigate }: HomePageProps) {
         </button>
       </section>
 
-      <section className="card stack">
+      <section className="card card--challenge stack">
         <h2 className="section-title">{t('home.challenge')}</h2>
         <p className="small muted">{t('home.challengeDesc')}</p>
-        <button type="button" className="button button--block" onClick={() => navigate('/challenge')}>
+        <button type="button" className="button button--outline button--block" onClick={() => navigate('/challenge')}>
           {t('home.challengeCta')}
         </button>
       </section>
