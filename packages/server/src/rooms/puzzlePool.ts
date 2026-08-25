@@ -6,7 +6,8 @@ import { RoomFailure } from './room.js';
 const warmUpPerDifficulty = 2;
 
 /**
- * Generating a puzzle is synchronous and costs tens of milliseconds, so doing it
+ * Generating a puzzle is synchronous and costs tens of milliseconds — a few
+ * hundred on expert, which retries far more carves before it settles — so doing it
  * on the path of an inbound message let a stream of `start_game` hold the event
  * loop for a large share of every second: heartbeats, broadcasts and HTTP all
  * queued behind it.

@@ -1,9 +1,9 @@
-import { DIFFICULTY_PROFILES, type Difficulty } from './difficulty.js';
+import { DIFFICULTY_PROFILES, HARD_TECHNIQUES, type Difficulty } from './difficulty.js';
 import { CELL_COUNT, EMPTY_CELL, createEmptyGrid, gridToString, parseGrid, type Grid } from './grid.js';
 import { solveLogically } from './logicalSolver.js';
 import { createRng, randomSeed, shuffle, type Rng } from './random.js';
 import { hasUniqueSolution, solveRandom } from './solver.js';
-import type { TechniqueId } from './techniques.js';
+import type { Step, TechniqueId } from './techniques.js';
 
 export interface Puzzle {
   difficulty: Difficulty;
@@ -35,9 +35,9 @@ export function generatePuzzle(
   options: GenerateOptions = {},
 ): Puzzle {
   const profile = DIFFICULTY_PROFILES[difficulty];
-  const maxAttempts = options.maxAttempts ?? 40;
-  /** Solvable within the band but easier than requested. */
-  let easierFallback: Puzzle | null = null;
+  const maxAttempts = options.maxAttempts ?? profile.attempts;
+  /** Closest near miss so far: solvable in the band, but short of what it promises. */
+  let nearMiss: { puzzle: Puzzle; hardSteps: number; score: number } | null = null;
   /** Valid puzzle that no allowed technique set cracks; last resort. */
   let lastResort: Puzzle | null = null;
 
@@ -53,18 +53,26 @@ export function generatePuzzle(
     }
 
     const graded: Puzzle = { ...candidate, techniques: withinBand.techniquesUsed, hardest: withinBand.hardest };
+    const hardSteps = countHardSteps(withinBand.steps);
 
-    // ...and must resist the previous, easier band.
+    // ...must resist the previous, easier band...
     const tooEasy = profile.resists.length > 0 && solveLogically(grid, { allowed: profile.resists }).solved;
-    if (tooEasy) {
-      easierFallback ??= graded;
+    // ...and must lean on the hard tools as often as the band promises.
+    if (tooEasy || hardSteps < profile.minHardSteps) {
+      // Keep the strongest near miss: when no grid fits, the closest one is served.
+      if (!nearMiss || hardSteps > nearMiss.hardSteps || (hardSteps === nearMiss.hardSteps && withinBand.score > nearMiss.score)) {
+        nearMiss = { puzzle: graded, hardSteps, score: withinBand.score };
+      }
       continue;
     }
     return graded;
   }
 
-  return easierFallback ?? lastResort ?? carve(difficulty, seed);
+  return nearMiss?.puzzle ?? lastResort ?? carve(difficulty, seed);
 }
+
+const countHardSteps = (steps: readonly Step[]): number =>
+  steps.filter((step) => HARD_TECHNIQUES.includes(step.technique)).length;
 
 /** Removes clues from a complete grid while the solution stays unique. */
 function carve(difficulty: Difficulty, seed: number): Puzzle {

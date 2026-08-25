@@ -24,6 +24,7 @@ export const it: Dictionary = {
   'difficulty.easy': 'Facile',
   'difficulty.medium': 'Medio',
   'difficulty.hard': 'Difficile',
+  'difficulty.expert': 'Esperto',
 
   'game.solo': 'Solitario',
   'game.room': 'Stanza {code}',
@@ -48,7 +49,7 @@ export const it: Dictionary = {
   'game.solvedDetail': 'Completato in {time} con {mistakes} errori.',
   'game.lost': 'Vite esaurite',
   'game.lostDetail': 'Tre errori chiudono la partita. Prova un altro schema.',
-  'game.loading': 'Sto creando uno schema {difficulty}…',
+  'game.loading': 'Sto creando uno schema di livello {difficulty}…',
   'game.loadingDetail':
     'Ogni schema viene verificato a soluzione unica e classificato in base alle tecniche necessarie per risolverlo.',
   'game.generateError': 'Non è stato possibile creare lo schema. Riprova.',

@@ -22,6 +22,7 @@ export const en = {
   'difficulty.easy': 'Easy',
   'difficulty.medium': 'Medium',
   'difficulty.hard': 'Hard',
+  'difficulty.expert': 'Expert',
 
   'game.solo': 'Solo',
   'game.room': 'Room {code}',
@@ -45,7 +46,7 @@ export const en = {
   'game.solvedDetail': 'Finished in {time} with {mistakes} mistakes.',
   'game.lost': 'Out of lives',
   'game.lostDetail': 'Three mistakes ends the run. Try another puzzle.',
-  'game.loading': 'Building a {difficulty} puzzle…',
+  'game.loading': 'Building your puzzle at {difficulty} level…',
   'game.loadingDetail':
     'Each puzzle is checked for a single solution and graded by the techniques needed to crack it.',
   'game.generateError': 'Could not create a puzzle. Please retry.',

@@ -9,7 +9,7 @@ Interface available in English and Italian; the code, comments and commit histor
 
 **Solo**
 
-- Easy / medium / hard, graded by the solving techniques a puzzle actually requires.
+- Easy / medium / hard / expert, graded by the solving techniques a puzzle actually requires.
 - Timer with pause and three mistakes allowed. A correct digit seats for good; a wrong one is shaken
   off and costs a life, so undo and erase act on the pencil marks and never on a spent life.
 - Tapping a digit lights every cell holding it. Tapping an empty cell marks the digits its own row and
@@ -76,8 +76,10 @@ candidate is then graded by a solver that applies human techniques in order of d
 | Advanced     | X-Wing, XY-Wing, Swordfish                                                     |
 
 A puzzle ships as *medium* only if singles alone cannot finish it, and as *hard* only if the
-intermediate set cannot either. The same solver drives the in-game hints, which is why a hint can
-name the technique and the cells that justify it.
+intermediate set cannot either. *Expert* goes one step further: it is carved down to about 23 clues
+and has to call on the advanced set at least twice, so a single lucky wing does not qualify. The same
+solver drives the in-game hints, which is why a hint can name the technique and the cells that
+justify it.
 
 ## Development
 

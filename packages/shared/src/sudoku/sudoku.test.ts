@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DIFFICULTIES, DIFFICULTY_PROFILES } from './difficulty.js';
+import { DIFFICULTIES, DIFFICULTY_PROFILES, HARD_TECHNIQUES } from './difficulty.js';
 import { generatePuzzle } from './generator.js';
 import {
   CELL_COUNT,
@@ -12,6 +12,7 @@ import {
   parseGrid,
   PEERS,
 } from './grid.js';
+import { solveLogically } from './logicalSolver.js';
 import { createRng } from './random.js';
 import { hasUniqueSolution, solve, solveRandom } from './solver.js';
 
@@ -86,6 +87,15 @@ describe('generator', () => {
       });
     });
   }
+
+  it('makes an expert grid keep asking for the advanced tools', () => {
+    const expert = generatePuzzle('expert', 7717);
+    const steps = solveLogically(parseGrid(expert.puzzle)).steps;
+    const hardSteps = steps.filter((step) => HARD_TECHNIQUES.includes(step.technique));
+
+    expect(hardSteps.length).toBeGreaterThanOrEqual(DIFFICULTY_PROFILES.expert.minHardSteps);
+    expect(expert.clues).toBeLessThan(DIFFICULTY_PROFILES.hard.targetClues + 1);
+  });
 
   it('gives harder difficulties fewer clues', () => {
     const easy = generatePuzzle('easy', 99);
