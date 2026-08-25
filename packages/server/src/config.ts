@@ -33,8 +33,17 @@ export const config = {
    */
   maxCostlyActionsPerWindow: 6,
   costlyActionWindowMs: 10 * 1000,
-  /** Same budget across every connection, so a fleet of sockets cannot stall the loop. */
-  maxCostlyActionsPerSecond: 10,
+  /**
+   * Same budget per address, so opening a fleet of sockets does not multiply the
+   * per-connection allowance.
+   */
+  maxCostlyActionsPerAddressWindow: 20,
+  /**
+   * Server-wide backstop. It sits well above what one address may spend, because
+   * a limit low enough for a single client to exhaust turns the limiter itself
+   * into the outage: everyone else gets `rate_limited` on create and join.
+   */
+  maxCostlyActionsPerSecond: 60,
   /** Concurrent sockets one address may hold open. */
   maxSocketsPerAddress: Number(process.env.MAX_SOCKETS_PER_ADDRESS ?? 12),
   /**

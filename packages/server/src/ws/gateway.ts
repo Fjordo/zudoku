@@ -10,7 +10,7 @@ import { config } from '../config.js';
 import { logger } from '../logger.js';
 import { RoomFailure, type Player, type Room } from '../rooms/room.js';
 import type { RoomManager } from '../rooms/roomManager.js';
-import { AddressLimits, clientAddress } from './limits.js';
+import { AddressLimits, clientAddress, createWindow, withinBudget, type Window } from './limits.js';
 import { parseClientMessage } from './parseMessage.js';
 
 interface Session {
@@ -20,11 +20,9 @@ interface Session {
   playerId: string | null;
   alive: boolean;
   /** Sliding window used for basic flood protection. */
-  windowStart: number;
-  messagesInWindow: number;
-  /** Separate, tighter window for the actions that cost memory or CPU. */
-  costlyWindowStart: number;
-  costlyActions: number;
+  messages: Window;
+  /** Separate, tighter window for the actions that cost memory or a room seat. */
+  costly: Window;
 }
 
 /** Actions that allocate a room or a seat in one, neither of them free. */
@@ -81,7 +79,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   });
   const sessions = new Map<WebSocket, Session>();
   /** Server-wide budget for costly actions, shared by every connection. */
-  const costlyBudget = { windowStart: Date.now(), count: 0 };
+  const costlyBudget = createWindow(Date.now());
 
   const send = (socket: WebSocket, message: ServerMessage): void => {
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
@@ -241,17 +239,16 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   };
 
   wss.on('connection', (socket, request) => {
+    const now = Date.now();
     const address = clientAddress(request);
-    limits.open(address);
+    limits.open(address, now);
     const session: Session = {
       address,
       roomCode: null,
       playerId: null,
       alive: true,
-      windowStart: Date.now(),
-      messagesInWindow: 0,
-      costlyWindowStart: Date.now(),
-      costlyActions: 0,
+      messages: createWindow(now),
+      costly: createWindow(now),
     };
     sessions.set(socket, session);
 
@@ -260,16 +257,18 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
     });
 
     socket.on('message', (raw) => {
-      if (isFlooding(session)) {
+      const at = Date.now();
+      if (!withinBudget(session.messages, at, config.maxMessagesPerSecond, 1000)) {
         fail(socket, 'rate_limited', 'Too many messages.');
         return;
       }
+      session.messages.count += 1;
       const message = parseClientMessage(raw.toString());
       if (!message) {
         fail(socket, 'invalid_message', 'Unrecognized message.');
         return;
       }
-      if (COSTLY_ACTIONS.has(message.type) && !allowCostly(session, costlyBudget)) {
+      if (COSTLY_ACTIONS.has(message.type) && !allowCostly(session, costlyBudget, limits, at)) {
         fail(socket, 'rate_limited', 'Too many rooms in a row.');
         return;
       }
@@ -292,7 +291,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
         broadcastRoom(room);
       }
       sessions.delete(socket);
-      limits.close(session.address);
+      limits.close(session.address, Date.now());
     });
 
     socket.on('error', (error) => logger.warn('socket error', { error: String(error) }));
@@ -310,6 +309,7 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   }, config.heartbeatIntervalMs);
 
   const sweeper = setInterval(() => {
+    limits.sweep(Date.now());
     const removed = rooms.sweep();
     if (removed > 0) logger.info('rooms swept', { removed, remaining: rooms.size });
   }, config.roomSweepIntervalMs);
@@ -321,38 +321,25 @@ export function createGateway(server: Server, rooms: RoomManager): () => void {
   };
 }
 
-interface Budget {
-  windowStart: number;
-  count: number;
-}
+/**
+ * Charges a costly action against the session, the address and the server-wide
+ * budget. Nothing is charged unless all three have room: counting refused
+ * attempts let a client that kept hammering after being throttled hold the
+ * shared counter above its limit, which locked every other player out of
+ * creating or joining a room for as long as the flood lasted.
+ */
+function allowCostly(session: Session, global: Window, limits: AddressLimits, now: number): boolean {
+  const address = limits.costlyWindow(session.address, now);
+  const hasBudget =
+    withinBudget(session.costly, now, config.maxCostlyActionsPerWindow, config.costlyActionWindowMs) &&
+    withinBudget(address, now, config.maxCostlyActionsPerAddressWindow, config.costlyActionWindowMs) &&
+    withinBudget(global, now, config.maxCostlyActionsPerSecond, 1000);
+  if (!hasBudget) return false;
 
-/** Charges a costly action against the session budget and the server-wide one. */
-function allowCostly(session: Session, global: Budget): boolean {
-  const now = Date.now();
-  if (now - session.costlyWindowStart >= config.costlyActionWindowMs) {
-    session.costlyWindowStart = now;
-    session.costlyActions = 0;
-  }
-  session.costlyActions += 1;
-  if (now - global.windowStart >= 1000) {
-    global.windowStart = now;
-    global.count = 0;
-  }
+  session.costly.count += 1;
+  address.count += 1;
   global.count += 1;
-  return (
-    session.costlyActions <= config.maxCostlyActionsPerWindow &&
-    global.count <= config.maxCostlyActionsPerSecond
-  );
-}
-
-function isFlooding(session: Session): boolean {
-  const now = Date.now();
-  if (now - session.windowStart >= 1000) {
-    session.windowStart = now;
-    session.messagesInWindow = 0;
-  }
-  session.messagesInWindow += 1;
-  return session.messagesInWindow > config.maxMessagesPerSecond;
+  return true;
 }
 
 const describe = (code: ServerErrorCode): string => {
