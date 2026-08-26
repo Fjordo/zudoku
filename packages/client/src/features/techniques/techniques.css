@@ -56,30 +56,21 @@
   aspect-ratio: 1;
   gap: 1px;
   padding: 2px;
-  background: var(--line);
-  border: 1px solid var(--box-line);
+  background: var(--rule);
+  border: 1px solid var(--rule-box);
   border-radius: var(--radius-sm);
 }
 
 .units__cell {
-  background: var(--plate);
+  background: var(--porcelain);
 }
 
-.units__grid--row {
-  --unit: var(--beam);
-}
-
-.units__grid--col {
-  --unit: var(--lamp);
-}
-
-.units__grid--box {
-  --unit: var(--flare);
-}
-
+/*
+ * Row, column and box each get their own grid, so they never need their own
+ * colour to be told apart: the shape is the whole lesson.
+ */
 .units__cell--lit {
-  background: color-mix(in srgb, var(--unit) 62%, var(--plate));
-  box-shadow: 0 0 8px color-mix(in srgb, var(--unit) 40%, transparent);
+  background: var(--rose);
 }
 
 .units__label {
@@ -124,16 +115,20 @@
   gap: var(--space-3);
 }
 
+/*
+ * The three bands run easiest to hardest. That is a scale, so it is shown as
+ * one: the same colour, turned up a step at a time.
+ */
 .techniques__band--basic {
-  --accent: var(--bone);
+  --accent: color-mix(in srgb, var(--neon) 45%, var(--bone));
 }
 
 .techniques__band--intermediate {
-  --accent: var(--beam);
+  --accent: color-mix(in srgb, var(--neon) 75%, var(--bone));
 }
 
 .techniques__band--advanced {
-  --accent: var(--flare);
+  --accent: var(--neon);
 }
 
 .techniques__heading {
@@ -285,10 +280,12 @@
   margin-inline: auto;
   gap: 1px;
   padding: 2px;
-  background: var(--line);
-  border: 1px solid var(--box-line);
+  background: var(--rule);
+  border: 1px solid var(--rule-box);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
+  /* A crop of the real plate, so it is read the same way the board is. */
+  color: var(--graphite);
   /* Capped per column, so a three-column crop does not become three enormous
      squares. A nine-column crop hits the container first and takes what it can. */
   max-width: calc(78px * var(--cols) + 30px);
@@ -309,7 +306,7 @@
 }
 
 .diagram__ruler--lit {
-  color: color-mix(in srgb, var(--accent) 85%, var(--bone));
+  color: color-mix(in srgb, var(--neon) 85%, var(--bone));
   font-weight: 700;
 }
 
@@ -320,40 +317,40 @@
   justify-content: center;
   aspect-ratio: 1;
   min-width: 0;
-  background: var(--plate);
-  color: var(--bone);
+  background: var(--porcelain);
+  color: var(--graphite);
 }
 
 .diagram__cell--edge-right {
-  box-shadow: 1px 0 0 var(--box-line);
+  box-shadow: 1px 0 0 var(--rule-box);
 }
 
 .diagram__cell--edge-bottom {
-  box-shadow: 0 1px 0 var(--box-line);
+  box-shadow: 0 1px 0 var(--rule-box);
 }
 
 .diagram__cell--edge-right.diagram__cell--edge-bottom {
-  box-shadow: 1px 0 0 var(--box-line), 0 1px 0 var(--box-line);
+  box-shadow: 1px 0 0 var(--rule-box), 0 1px 0 var(--rule-box);
 }
 
-/* The line the argument runs along, washed just enough to be followed. */
+/* The line the argument runs along: warmer paper, the way the board lifts a row. */
 .diagram__cell--band {
-  background: color-mix(in srgb, var(--beam) 8%, var(--plate));
+  background: var(--porcelain-lift);
 }
 
-/* Aqua is light in this app, so it marks what the technique found. */
+/* Fuchsia is yours, and the pattern is what you are being taught to see. */
 .diagram__cell--pattern {
-  background: color-mix(in srgb, var(--beam) 32%, var(--plate));
+  background: color-mix(in srgb, var(--rose) 30%, var(--porcelain));
 }
 
-/* Magenta means something is coming off the board. */
+/* Blue is the plate talking, and here it points at what it can rule out. */
 .diagram__cell--target {
-  background: color-mix(in srgb, var(--flare) 26%, var(--plate));
+  background: color-mix(in srgb, var(--blue-light) 30%, var(--porcelain));
 }
 
 /* Supporting digits are ringed, not filled: they explain, they are not the point. */
 .diagram__cell--cause {
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--lamp) 70%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--graphite) 55%, transparent);
 }
 
 .diagram__digit {
@@ -362,22 +359,22 @@
 }
 
 .diagram__cell--cause .diagram__digit {
-  color: var(--lamp);
+  color: var(--graphite);
 }
 
 .diagram__mark {
   font-size: calc(46cqw / var(--cols));
   font-weight: 700;
-  color: var(--bone);
+  color: var(--graphite);
 }
 
 /* The digit stays legible and the strike is what carries the meaning, so they
-   are coloured apart rather than blended into one magenta glyph. */
+   are coloured apart rather than blended into one glyph. */
 .diagram__mark--ruled {
-  color: color-mix(in srgb, var(--text-muted) 65%, var(--bone));
+  color: color-mix(in srgb, var(--graphite) 45%, var(--porcelain));
   font-weight: 500;
   text-decoration: line-through;
-  text-decoration-color: var(--flare);
+  text-decoration-color: var(--blue);
   text-decoration-thickness: 0.1em;
 }
 
@@ -388,7 +385,7 @@
   height: 100%;
   font-size: calc(17cqw / var(--cols));
   line-height: 1;
-  color: var(--text-muted);
+  color: color-mix(in srgb, var(--graphite) 58%, var(--porcelain));
 }
 
 .diagram__note {
@@ -397,28 +394,29 @@
   justify-content: center;
 }
 
-/* The digits the technique is about, lit like the digit you have selected on
+/* The digits the technique is about, inked like the digit you have in play on
    the real board. */
 .diagram__note--focus {
-  color: var(--lamp);
+  color: var(--rose);
   font-weight: 700;
 }
 
 .diagram__note--cut {
-  color: color-mix(in srgb, var(--text-muted) 55%, var(--bone));
+  color: color-mix(in srgb, var(--graphite) 42%, var(--porcelain));
   text-decoration: line-through;
-  text-decoration-color: var(--flare);
+  text-decoration-color: var(--blue);
   text-decoration-thickness: 0.12em;
 }
 
 .diagram__cell--pattern .diagram__note,
 .diagram__cell--target .diagram__note {
-  color: color-mix(in srgb, var(--bone) 75%, transparent);
+  color: color-mix(in srgb, var(--graphite) 72%, transparent);
 }
 
 .diagram__cell--pattern .diagram__note--focus,
 .diagram__cell--target .diagram__note--focus {
-  color: var(--lamp);
+  color: var(--graphite);
+  font-weight: 700;
 }
 
 .diagram__legend {
@@ -443,27 +441,27 @@
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  background: var(--plate);
+  background: var(--porcelain);
   border: 1px solid var(--line);
 }
 
 .diagram__swatch--pattern {
-  background: color-mix(in srgb, var(--beam) 55%, var(--plate));
+  background: color-mix(in srgb, var(--rose) 45%, var(--porcelain));
   border-color: transparent;
 }
 
 .diagram__swatch--target {
-  background: color-mix(in srgb, var(--flare) 50%, var(--plate));
+  background: color-mix(in srgb, var(--blue-light) 46%, var(--porcelain));
   border-color: transparent;
 }
 
 .diagram__swatch--cause {
-  background: var(--plate);
-  border: 2px solid color-mix(in srgb, var(--lamp) 75%, transparent);
+  background: var(--porcelain);
+  border: 2px solid color-mix(in srgb, var(--graphite) 55%, transparent);
 }
 
 .diagram__swatch--focus {
-  background: var(--lamp);
+  background: var(--rose);
   border-color: transparent;
 }
 
@@ -471,8 +469,8 @@
   background: linear-gradient(
     to bottom right,
     transparent calc(50% - 1px),
-    var(--flare) calc(50% - 1px),
-    var(--flare) calc(50% + 1px),
+    var(--blue) calc(50% - 1px),
+    var(--blue) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }
@@ -485,4 +483,53 @@
 
 .diagram__reading {
   font-style: italic;
+}
+
+/* --- the guide as a sheet over a running game --- */
+
+/*
+ * Same content, different container: on the page the guide is the page, in a
+ * game it is a layer above the board, so it carries its own scroll and its own
+ * ground instead of borrowing the page's.
+ */
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--room) 94%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.sheet__scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  /* The board underneath must not scroll once the sheet runs out of content. */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* The close button rides along instead of scrolling out of reach. */
+.sheet .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: calc(var(--space-4) * -1) 0 0;
+  padding: var(--space-4) 0;
+  background: linear-gradient(
+    180deg,
+    var(--room) 62%,
+    color-mix(in srgb, var(--room) 70%, transparent) 88%,
+    transparent
+  );
 }

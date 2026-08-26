@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Zudoku">
-  <rect width="64" height="64" rx="14" fill="#12101c" />
-  <g fill="none" stroke="#4f4479" stroke-width="2">
-    <path d="M10 10h44v44H10z" />
-    <path d="M24.7 10v44M39.3 10v44M10 24.7h44M10 39.3h44" />
+  <rect width="64" height="64" rx="14" fill="#150e1f" />
+  <rect x="9" y="9" width="46" height="46" rx="4" fill="#faf4e8" />
+  <g fill="none" stroke="#57493a" stroke-width="1.6">
+    <path d="M24.3 9v46M39.7 9v46M9 24.3h46M9 39.7h46" />
   </g>
-  <rect x="12" y="12" width="10.7" height="10.7" fill="#f2ecdf" />
-  <rect x="26.7" y="26.7" width="10.7" height="10.7" fill="#5fe3d0" />
-  <rect x="41.3" y="41.3" width="10.7" height="10.7" fill="#f2ecdf" />
-  <rect x="12" y="41.3" width="10.7" height="10.7" fill="#ffb43f" />
+  <rect x="11" y="11" width="11.3" height="11.3" fill="#241b31" />
+  <rect x="26.3" y="26.3" width="11.3" height="11.3" fill="#c4136e" />
+  <rect x="41.7" y="41.7" width="11.3" height="11.3" fill="#241b31" />
+  <rect x="11" y="41.7" width="11.3" height="11.3" fill="#1d3f8e" />
 </svg>

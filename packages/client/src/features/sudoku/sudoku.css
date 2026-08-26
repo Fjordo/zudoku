@@ -1,8 +1,14 @@
 /*
- * The board is the signature: a dark plate that lights only what you already
- * know. The digit you pick lights the cells holding it, the cell you pick lights
- * the digits its row and column can see, and the plate itself answers an entry —
- * seating a correct digit for good, shaking a wrong one off.
+ * The board is the signature: a porcelain plate, the one lit surface in a dark
+ * room. The puzzle arrives printed on it in graphite and everything you add is
+ * written in fuchsia, the same colour as the keys you pressed to write it.
+ *
+ * Blue is the plate's half of the conversation. Press a digit and the key turns
+ * blue; so does every cell already holding that digit, and every pencil mark
+ * for it. One gesture, one colour, from your thumb all the way across the grid.
+ *
+ * The plate answers an entry too: it seats a correct digit for good, and
+ * refuses a wrong one by going dark under it until the shake is done.
  */
 
 .game__layout {
@@ -47,7 +53,7 @@
     bottom: 0;
     z-index: 3;
     padding: var(--space-2) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
-    background: linear-gradient(180deg, transparent 0%, var(--ink) 22%);
+    background: linear-gradient(180deg, transparent 0%, var(--room) 22%);
   }
 }
 
@@ -62,7 +68,7 @@
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--surface) 85%, transparent),
-    color-mix(in srgb, var(--ink) 75%, transparent)
+    color-mix(in srgb, var(--room) 75%, transparent)
   );
 }
 
@@ -91,7 +97,7 @@
   color: var(--bone);
 }
 
-/* Lives read faster as lamps than as a fraction. */
+/* Lives read faster as lamps than as a fraction, and a mistake puts one out. */
 .lives {
   display: flex;
   gap: 5px;
@@ -103,14 +109,14 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--lamp);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--lamp) 55%, transparent);
+  background: var(--neon);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--neon) 60%, transparent);
   transition: background 200ms ease, box-shadow 200ms ease;
 }
 
 .lives__pip--spent {
-  background: color-mix(in srgb, var(--flare) 30%, var(--line));
-  box-shadow: none;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--neon) 28%, var(--line));
 }
 
 /* --- hint --- */
@@ -121,11 +127,11 @@
   gap: var(--space-3);
   padding: var(--space-3);
   border-radius: var(--radius);
-  border: 1px solid color-mix(in srgb, var(--beam) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--blue-light) 40%, transparent);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--beam) 14%, var(--surface)),
-    color-mix(in srgb, var(--ink) 70%, transparent)
+    color-mix(in srgb, var(--blue-light) 10%, var(--surface)),
+    color-mix(in srgb, var(--room) 70%, transparent)
   );
 }
 
@@ -143,7 +149,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--beam);
+  color: var(--blue-light);
 }
 
 .hint__actions {
@@ -217,10 +223,16 @@
   width: 100%;
   gap: 1px;
   padding: 3px;
-  background: var(--line);
-  border: 1px solid var(--box-line);
+  background: var(--rule);
+  border: 1px solid var(--rule-box);
   border-radius: var(--radius);
-  box-shadow: 0 24px 60px rgb(4 2 10 / 55%), inset 0 1px 0 color-mix(in srgb, var(--bone) 8%, transparent);
+  /*
+   * Weight underneath and a fuchsia bloom around it: the plate is lit, and the
+   * room takes its colour from it rather than the other way round.
+   */
+  box-shadow:
+    0 26px 64px rgb(4 2 10 / 62%),
+    0 0 70px color-mix(in srgb, var(--neon) 18%, transparent);
   overflow: hidden;
 }
 
@@ -234,9 +246,10 @@
   min-height: 0;
   padding: 0;
   border: none;
-  background: var(--plate);
-  /* Amber is what you wrote; bone is what the puzzle came with. */
-  color: var(--lamp);
+  /* The cells you can still write in are the brightest paper on the plate. */
+  background: var(--porcelain);
+  /* Fuchsia is what you wrote; graphite is what the puzzle came printed with. */
+  color: var(--rose);
   font-family: var(--font-mono);
   font-size: 6cqw;
   font-weight: 600;
@@ -244,31 +257,36 @@
 }
 
 .cell--edge-right {
-  box-shadow: 2px 0 0 var(--box-line);
+  box-shadow: 2px 0 0 var(--rule-box);
   z-index: 1;
 }
 
 .cell--edge-bottom {
-  box-shadow: 0 2px 0 var(--box-line);
+  box-shadow: 0 2px 0 var(--rule-box);
   z-index: 1;
 }
 
 .cell--edge-right.cell--edge-bottom {
-  box-shadow: 2px 0 0 var(--box-line), 0 2px 0 var(--box-line);
+  box-shadow: 2px 0 0 var(--rule-box), 0 2px 0 var(--rule-box);
 }
 
+/*
+ * What the puzzle came with. It needs no paper of its own: graphite against
+ * fuchsia already says which digits were printed and which you wrote, and
+ * tinting half the grid only made the plate mottled.
+ */
 .cell--given {
-  color: var(--bone);
-  background: color-mix(in srgb, var(--bone) 4%, var(--plate));
+  color: var(--graphite);
 }
 
+/* The game filled this one in for you, and says so in its own colour. */
 .cell--hinted {
-  color: var(--beam);
+  color: var(--blue);
 }
 
-/* The row and column of the selected cell: lifted, not lit. */
+/* The row and column of the selected cell: warmer paper, never a second colour. */
 .cell--related {
-  background: color-mix(in srgb, var(--bone) 7%, var(--plate));
+  background: var(--porcelain-lift);
 }
 
 /*
@@ -276,35 +294,39 @@
  * scale. The board states what is there and never what is missing.
  */
 .cell--placed {
-  background-color: color-mix(in srgb, var(--bone) 14%, var(--plate));
-  background-image: linear-gradient(to right, color-mix(in srgb, currentcolor 70%, transparent) 0 100%);
+  background-color: color-mix(in srgb, var(--rule) 42%, var(--porcelain));
+  background-image: linear-gradient(to right, color-mix(in srgb, currentcolor 65%, transparent) 0 100%);
   background-repeat: no-repeat;
   background-size: 42% 2px;
   background-position: center calc(100% - 12%);
 }
 
+/*
+ * Cells holding the digit in play — the plate answering the key you pressed, so
+ * they take the key's colour. On porcelain blue cannot glow, so the light
+ * becomes ink: a wash and a ring. The digit itself keeps its own colour —
+ * whether it was printed or you wrote it is still the more useful fact.
+ */
 .cell--matched {
-  background: color-mix(in srgb, var(--beam) 24%, var(--plate));
-  color: var(--bone);
+  background: color-mix(in srgb, var(--blue-light) 32%, var(--porcelain));
 }
 
 /*
- * The lamp itself. The glow lives on a pseudo-element because the cell's own
- * box-shadow is already carrying the 3x3 separators.
+ * The ring lives on a pseudo-element because the cell's own box-shadow is
+ * already carrying the 3x3 separators.
  */
 .cell--matched::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--beam) 55%, transparent),
-    0 0 14px color-mix(in srgb, var(--beam) 40%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue) 58%, transparent);
 }
 
+/* The one cell you are on: full ink, so it reads from across the room. */
 .cell--selected {
-  background: color-mix(in srgb, var(--beam) 42%, var(--plate));
-  color: #10131c;
+  background: var(--rose);
+  color: var(--porcelain);
 }
 
 /*
@@ -338,10 +360,8 @@
 
 @keyframes seat-ring {
   from {
-    background: color-mix(in srgb, var(--lamp) 30%, transparent);
-    box-shadow:
-      inset 0 0 0 2px color-mix(in srgb, var(--lamp) 80%, transparent),
-      0 0 18px color-mix(in srgb, var(--lamp) 45%, transparent);
+    background: color-mix(in srgb, var(--rose) 34%, transparent);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rose) 85%, transparent);
   }
 
   to {
@@ -350,11 +370,16 @@
   }
 }
 
-/* A wrong digit is refused: it flares, is shaken off and leaves the cell as it was. */
+/*
+ * A wrong digit is refused, and the refusal costs a colour rather than adding
+ * one: the porcelain cuts out under it, the digit is left burning in the dark,
+ * and the cell is back to paper by the time the shake ends. It is the only dark
+ * cell the plate ever shows, which is exactly why it reads at a glance.
+ */
 .cell--rejected {
-  color: var(--flare);
+  color: var(--neon);
   /* Also the resting state, so the refusal still reads without the animation. */
-  background: color-mix(in srgb, var(--flare) 34%, var(--plate));
+  background: var(--graphite);
   animation: reject-plate 580ms ease-out both;
 }
 
@@ -364,11 +389,15 @@
 
 @keyframes reject-plate {
   from {
-    background: color-mix(in srgb, var(--flare) 34%, var(--plate));
+    background: var(--graphite);
+  }
+
+  60% {
+    background: var(--graphite);
   }
 
   to {
-    background: var(--plate);
+    background: var(--porcelain);
   }
 }
 
@@ -401,13 +430,13 @@
 }
 
 .cell--explained {
-  outline: 2px solid var(--lamp);
+  outline: 2px solid var(--blue);
   outline-offset: -2px;
   z-index: 2;
 }
 
 .cell:focus-visible {
-  outline: 2px solid var(--bone);
+  outline: 2px solid var(--graphite);
   outline-offset: -2px;
   z-index: 3;
 }
@@ -429,7 +458,7 @@
   font-size: clamp(9px, 3.2cqw, 16px);
   font-weight: 600;
   letter-spacing: -0.03em;
-  color: color-mix(in srgb, var(--text-muted) 72%, var(--bone));
+  color: color-mix(in srgb, var(--graphite) 62%, var(--porcelain));
 }
 
 .cell__note {
@@ -439,32 +468,34 @@
   line-height: 1;
 }
 
-/* Notes stay legible on every lit state a cell can take. */
+/* Notes stay legible on every state a cell can take. */
 .cell--related .cell__notes {
-  color: color-mix(in srgb, var(--bone) 84%, transparent);
+  color: color-mix(in srgb, var(--graphite) 66%, var(--porcelain-lift));
 }
 
 .cell--selected .cell__notes {
-  color: color-mix(in srgb, #10131c 82%, transparent);
+  color: color-mix(in srgb, var(--porcelain) 78%, transparent);
 }
 
-/* The note for the digit in play lights like the cells that already hold it. */
+/* The note for the digit in play is inked like the cells that already hold it. */
 .cell__note--active {
-  color: var(--beam);
+  color: var(--blue);
   font-weight: 700;
 }
 
 .cell--selected .cell__note--active {
-  color: #10131c;
+  color: var(--porcelain);
 }
 
 /* --- number pad --- */
 
 /*
- * The keypad holds only the digits still worth entering, so it empties as the
- * board fills. Keys keep the width they had when there were nine of them and
- * the row simply gets shorter, centred — the console reads as work remaining,
- * not as a fixed instrument with dead keys on it.
+ * The keypad is the lit console under the plate, and the only block of solid
+ * colour in the room: nine fuchsia keys against plum, so there is never a
+ * question of where you type. It holds only the digits still worth entering, so
+ * it empties as the board fills — keys keep the width they had when there were
+ * nine of them and the row simply gets shorter, centred. The console burns down
+ * as you play, and an empty one means a finished grid.
  */
 .pad {
   display: flex;
@@ -488,17 +519,66 @@
   min-width: 0;
   min-height: 54px;
   padding: 0;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--on-neon) 30%, transparent);
   border-radius: var(--radius-sm);
-  background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--ink) 60%, var(--surface)));
-  color: var(--bone);
-  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  /* Lit from the top edge, the way a keycap catches the light above it. */
+  background: linear-gradient(180deg, var(--key-top), var(--key));
+  color: var(--on-neon);
+  box-shadow:
+    0 0 20px color-mix(in srgb, var(--neon) 26%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent);
+  transition: background 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
 
+.pad__key:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ff85c4, #f8479f);
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--neon) 38%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 42%, transparent);
+}
+
+.pad__key:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/*
+ * The digit in play. A key that only got brighter was a nuance, not a state —
+ * across a row of nine you could not tell at a glance which one you were
+ * holding. So it changes colour instead, and changes it completely.
+ *
+ * It goes down rather than up: a deep blue face — the bottom stop is literally
+ * this blue mixed into the room, so the key belongs to the page and not to the
+ * console — with light type, a bright rim and a blue halo around it. Eight keys
+ * stand proud and lit, one is pressed into the board, and it is lit in exactly
+ * the colour every cell holding that digit has just turned.
+ */
 .pad__key[aria-pressed='true'] {
-  border-color: color-mix(in srgb, var(--beam) 65%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--beam) 30%, var(--surface)), var(--surface));
-  box-shadow: 0 0 16px color-mix(in srgb, var(--beam) 30%, transparent);
+  border-color: color-mix(in srgb, var(--blue-light) 72%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--blue-light) 30%, var(--blue)),
+    color-mix(in srgb, var(--blue) 84%, var(--room))
+  );
+  color: var(--porcelain);
+  box-shadow:
+    0 0 26px color-mix(in srgb, var(--blue-light) 46%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 24%, transparent);
+}
+
+.pad__key[aria-pressed='true'] .pad__count {
+  color: color-mix(in srgb, var(--porcelain) 82%, transparent);
+}
+
+/* Hover must not repaint the key you are already holding. */
+.pad__key[aria-pressed='true']:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--blue-light) 44%, var(--blue)),
+    var(--blue)
+  );
+  box-shadow:
+    0 0 32px color-mix(in srgb, var(--blue-light) 60%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 32%, transparent);
 }
 
 /* A finished or paused game must read as unavailable, not just be inert. */
@@ -514,10 +594,16 @@
   line-height: 1;
 }
 
+/*
+ * How many of that digit are left: a reading on the key, not a second label.
+ * It is held back by size and weight rather than by fading it, which at this
+ * size would have put it under the contrast floor.
+ */
 .pad__count {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
-  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--on-neon);
 }
 
 /* --- controls --- */
@@ -537,7 +623,7 @@
   min-height: 56px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--ink) 45%, var(--surface));
+  background: color-mix(in srgb, var(--room) 45%, var(--surface));
   font-size: 0.76rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -546,12 +632,13 @@
 
 .controls__button:hover:not(:disabled) {
   color: var(--text);
-  border-color: color-mix(in srgb, var(--beam) 35%, var(--line));
+  border-color: color-mix(in srgb, var(--neon) 40%, var(--line));
 }
 
+/* Notes mode is on: lit, but nowhere near as bright as a key. */
 .controls__button[aria-pressed='true'] {
-  border-color: color-mix(in srgb, var(--lamp) 60%, transparent);
-  background: color-mix(in srgb, var(--lamp) 16%, var(--surface));
+  border-color: color-mix(in srgb, var(--neon) 62%, transparent);
+  background: color-mix(in srgb, var(--neon) 18%, var(--surface));
   color: var(--bone);
 }
 
@@ -574,7 +661,7 @@
   padding: var(--space-5);
   text-align: center;
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--ink) 92%, transparent);
+  background: color-mix(in srgb, var(--room) 92%, transparent);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
 }

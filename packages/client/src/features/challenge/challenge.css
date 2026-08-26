@@ -12,7 +12,7 @@
   font-weight: 700;
   color: var(--bone);
   /* The code is the thing you read out loud: lit like a marquee. */
-  text-shadow: 0 0 26px color-mix(in srgb, var(--flare) 55%, transparent);
+  text-shadow: 0 0 28px color-mix(in srgb, var(--neon) 60%, transparent);
   /* Balances the trailing letter-spacing so the code stays centred. */
   text-indent: 0.22em;
 }
@@ -45,7 +45,7 @@
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--ink) 45%, var(--surface));
+  background: color-mix(in srgb, var(--room) 45%, var(--surface));
 }
 
 .players__row--stacked {
@@ -70,33 +70,34 @@
 }
 
 .players__ready {
-  color: var(--beam);
+  color: var(--blue-light);
   font-size: 0.82rem;
   font-weight: 600;
 }
 
 .badge--win {
-  border-color: color-mix(in srgb, var(--lamp) 60%, transparent);
-  background: color-mix(in srgb, var(--lamp) 18%, transparent);
-  color: var(--lamp);
+  border-color: color-mix(in srgb, var(--neon) 60%, transparent);
+  background: color-mix(in srgb, var(--neon) 18%, transparent);
+  color: var(--neon);
 }
 
 .progress {
   height: 6px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 70%, var(--surface));
+  background: color-mix(in srgb, var(--room) 70%, var(--surface));
   overflow: hidden;
 }
 
 .progress__bar {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--beam) 70%, transparent), var(--beam));
-  box-shadow: 0 0 12px color-mix(in srgb, var(--beam) 45%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--neon) 65%, transparent), var(--neon));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--neon) 45%, transparent);
   transition: width 220ms ease;
 }
 
+/* Out of the game: the bar keeps its length and loses its light. */
 .progress__bar--out {
-  background: var(--flare);
+  background: color-mix(in srgb, var(--neon) 22%, var(--line));
   box-shadow: none;
 }

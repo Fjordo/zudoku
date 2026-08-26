@@ -1,7 +1,9 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Difficulty } from '@zudoku/shared';
 import { LanguageSwitcher } from '../../../components/LanguageSwitcher';
+import { TechniquesDialog } from '../../techniques/TechniquesDialog';
 import { useI18n } from '../../../i18n';
+import { useBoardKeyboard } from '../useBoardKeyboard';
 import type { SudokuGameApi } from '../useSudokuGame';
 import { Board } from './Board';
 import { GameControls } from './GameControls';
@@ -16,7 +18,6 @@ interface GameScreenProps {
   elapsedMs: number;
   title: string;
   onExit: () => void;
-  onLearnMore: () => void;
   /** Extra panel shown beside the board, e.g. the challenge scoreboard. */
   aside?: ReactNode;
   /** Result panel shown once the game is over. */
@@ -31,14 +32,16 @@ export function GameScreen({
   elapsedMs,
   title,
   onExit,
-  onLearnMore,
   aside,
   overlay,
   locked = false,
 }: GameScreenProps) {
   const { t } = useI18n();
+  const [guideOpen, setGuideOpen] = useState(false);
   const { state, highlight, filled } = game;
   const disabled = locked || state.status !== 'playing';
+
+  useBoardKeyboard(game, !disabled && !guideOpen);
 
   return (
     <div className={state.hint ? 'page page--wide game game--hinted' : 'page page--wide game'}>
@@ -66,7 +69,7 @@ export function GameScreen({
               <HintBanner
                 hint={state.hint}
                 onDismiss={() => game.dispatch({ type: 'dismiss_hint' })}
-                onLearnMore={onLearnMore}
+                onLearnMore={() => setGuideOpen(true)}
               />
             )}
             <NumberPad state={state} disabled={disabled} onInput={game.input} />
@@ -84,6 +87,9 @@ export function GameScreen({
         </div>
         {aside && <aside className="game__aside">{aside}</aside>}
       </div>
+
+      {/* Read the rules without leaving the game: a challenge cannot be rejoined. */}
+      {guideOpen && <TechniquesDialog onClose={() => setGuideOpen(false)} />}
     </div>
   );
 }

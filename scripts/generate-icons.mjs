@@ -12,11 +12,13 @@ const OUT_DIR = path.resolve(
   '../packages/client/public/icons',
 );
 
-const BACKGROUND = [18, 16, 28];
-const GRID = [79, 68, 121];
-const BEAM = [95, 227, 208];
-const LAMP = [255, 180, 63];
-const LIGHT = [242, 236, 223];
+const ROOM = [21, 14, 31];
+const PORCELAIN = [252, 246, 234];
+const PRINT = [239, 230, 210];
+const RULE = [87, 73, 58];
+const GRAPHITE = [36, 27, 49];
+const ROSE = [196, 19, 110];
+const BLUE = [29, 63, 142];
 
 /** Draws the logo: a 3x3 grid with a few filled cells. */
 function drawIcon(size, { padding }) {
@@ -35,27 +37,29 @@ function drawIcon(size, { padding }) {
     }
   };
 
-  rect(0, 0, size, size, BACKGROUND);
+  rect(0, 0, size, size, ROOM);
 
   const board = size - padding * 2;
   const cell = Math.floor(board / 3);
   const line = Math.max(2, Math.round(size / 64));
 
-  // Bone clues on the diagonal, one aqua lamp, one amber entry: the palette in miniature.
+  // The palette in miniature: graphite clues printed on porcelain, one written
+  // in fuchsia, one lit in blue.
+  rect(padding, padding, cell * 3, cell * 3, PORCELAIN);
   const filled = [
-    [0, 0, LIGHT],
-    [1, 1, BEAM],
-    [2, 2, LIGHT],
-    [2, 0, LAMP],
-    [0, 2, GRID],
+    [0, 0, GRAPHITE],
+    [1, 1, ROSE],
+    [2, 2, GRAPHITE],
+    [2, 0, PRINT],
+    [0, 2, BLUE],
   ];
   for (const [column, row, color] of filled) {
     rect(padding + column * cell + line, padding + row * cell + line, cell - line * 2, cell - line * 2, color);
   }
 
   for (let index = 0; index <= 3; index += 1) {
-    rect(padding + index * cell - line / 2, padding, line, cell * 3, GRID);
-    rect(padding, padding + index * cell - line / 2, cell * 3, line, GRID);
+    rect(padding + index * cell - line / 2, padding, line, cell * 3, RULE);
+    rect(padding, padding + index * cell - line / 2, cell * 3, line, RULE);
   }
 
   return pixels;

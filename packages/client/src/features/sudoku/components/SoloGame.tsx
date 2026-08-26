@@ -16,7 +16,6 @@ interface SoloGameProps {
   restoredElapsedMs: number;
   onExit: () => void;
   onNewGame: () => void;
-  onLearnMore: () => void;
 }
 
 /** One solo run: timer, persistence and the end-of-game panel. */
@@ -28,7 +27,6 @@ export function SoloGame({
   restoredElapsedMs,
   onExit,
   onNewGame,
-  onLearnMore,
 }: SoloGameProps) {
   const { t } = useI18n();
   const setup = useMemo(
@@ -98,7 +96,6 @@ export function SoloGame({
       elapsedMs={elapsedMs}
       title={t('game.solo')}
       onExit={onExit}
-      onLearnMore={onLearnMore}
       locked={paused}
       overlay={overlay}
       aside={

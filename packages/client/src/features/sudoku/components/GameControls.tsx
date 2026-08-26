@@ -44,7 +44,7 @@ export function GameControls({
         {notesMode ? t('game.notesOn') : t('game.notesOff')}
       </button>
       <button type="button" className="controls__button" disabled={disabled || hintsLeft <= 0} onClick={onHint}>
-        <span aria-hidden="true">💡</span>
+        <span aria-hidden="true">✦</span>
         {t('game.hint', { count: hintsLeft })}
       </button>
     </div>

@@ -40,7 +40,6 @@ export function ChallengePage({ code, navigate }: ChallengePageProps) {
         startedAt={startedAt}
         challenge={challenge}
         onExit={leave}
-        onLearnMore={() => navigate('/techniques')}
       />
     );
   }

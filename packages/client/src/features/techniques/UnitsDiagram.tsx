@@ -18,7 +18,7 @@ export function UnitsDiagram() {
     <ul className="units">
       {UNITS.map((unit) => (
         <li key={unit.key} className="units__item">
-          <div className={`units__grid units__grid--${unit.key}`} role="img" aria-label={t(unit.label)}>
+          <div className="units__grid" role="img" aria-label={t(unit.label)}>
             {Array.from({ length: CELL_COUNT }, (_, index) => (
               <span
                 key={index}

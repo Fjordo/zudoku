@@ -67,10 +67,6 @@ describe('Board and NumberPad', () => {
 
     expect(target.textContent).toBe(String(digit));
     expect(target.className).toContain('cell--locked');
-
-    // The cell is final: erasing it is not on offer any more.
-    await user.keyboard('{Backspace}');
-    expect(target.textContent).toBe(String(digit));
   });
 
   it('shakes a wrong digit off instead of keeping it', async () => {

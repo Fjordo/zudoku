@@ -22,7 +22,6 @@ interface ChallengeGameProps {
   startedAt: number;
   challenge: ChallengeApi;
   onExit: () => void;
-  onLearnMore: () => void;
 }
 
 /** The race itself: same rules as solo, with progress mirrored to the room. */
@@ -33,7 +32,6 @@ export function ChallengeGame({
   startedAt,
   challenge,
   onExit,
-  onLearnMore,
 }: ChallengeGameProps) {
   const { t } = useI18n();
 
@@ -88,7 +86,6 @@ export function ChallengeGame({
       elapsedMs={elapsedMs}
       title={t('game.room', { code: room.code })}
       onExit={onExit}
-      onLearnMore={onLearnMore}
       locked={!racing}
       overlay={overlay}
       aside={<Scoreboard room={room} playerId={playerId} />}

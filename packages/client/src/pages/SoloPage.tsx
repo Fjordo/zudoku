@@ -99,7 +99,6 @@ export function SoloPage({ difficulty, navigate }: SoloPageProps) {
       restoredElapsedMs={session.restoredElapsedMs}
       onExit={() => navigate('/')}
       onNewGame={startNewGame}
-      onLearnMore={() => navigate('/techniques')}
     />
   );
 }
