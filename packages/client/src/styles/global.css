@@ -1,7 +1,7 @@
 /*
  * Theme: a porcelain plate on a lit console, in a dark room.
  *
- * Two colours, and the split between them is the whole system:
+ * Two colours carry the game, and the split between them is the whole system:
  *
  *   fuchsia is you   — where your cursor is, what you wrote, the keys you press
  *   blue is the plate answering — the digit in play and every cell holding it,
@@ -11,7 +11,10 @@
  * on cream, bright enough to glow on plum. That is why press a key and the
  * board turns blue — you asked, and it answered.
  *
- * The third rule is what replaces the old error colours: everything you do adds
+ * Petrol is the third colour and it never appears on the plate: it belongs to
+ * the one control that starts a game, and to nothing else.
+ *
+ * The last rule is what replaces the old error colours: everything you do adds
  * light, every mistake takes it away. A refused digit does not turn red, the
  * cell goes dark. A spent life is a lamp that went out.
  */
@@ -40,6 +43,20 @@
   --key-top: #ff64b2;
   /* Sits on top of fuchsia — the keycap digit, the selected cell's value. */
   --on-neon: #2b0a1d;
+
+  /*
+   * --- petrol: the way in ---
+   *
+   * The one control that starts something — play, resume, join, deal another
+   * puzzle — is not a digit key and no longer dressed as one. Fuchsia is what
+   * you write with once you are inside; petrol is the door. Deep enough to
+   * stay quiet next to the lit keypad, lit enough along its top edge to read
+   * as the thing to press.
+   */
+  --petrol: #0b5f68;
+  --petrol-top: #14818a;
+  --petrol-lit: #2bb3ac;
+  --on-petrol: #eafaf7;
 
   /* --- blue: the plate answering. Same two registers. --- */
   /*
@@ -253,24 +270,28 @@ p {
 }
 
 /*
- * A fuchsia slab means press this, and it is cut from the same stock as a
- * keypad key: same gradient, same glow, so the main action on a page and the
- * digit you are about to enter are recognisably the same kind of control.
+ * A petrol slab means press this to start playing. It is the only petrol in the
+ * app, so wherever it turns up — the home card, a paused board, the end of a
+ * match — it is the same promise, and it never competes with the fuchsia you
+ * write digits with.
  */
 .button--primary {
-  background: linear-gradient(180deg, var(--key-top), var(--key));
-  border-color: color-mix(in srgb, var(--on-neon) 30%, transparent);
-  color: var(--on-neon);
+  /* Its own focus ring, so the one control off the fuchsia scale keeps its colour. */
+  --accent: var(--petrol-lit);
+  background: linear-gradient(180deg, var(--petrol-top), var(--petrol));
+  border-color: color-mix(in srgb, var(--petrol-lit) 50%, transparent);
+  color: var(--on-petrol);
   box-shadow:
-    0 0 22px color-mix(in srgb, var(--neon) 28%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent);
+    0 0 22px color-mix(in srgb, var(--petrol-lit) 20%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 22%, transparent);
 }
 
 .button--primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ff85c4, #f8479f);
+  background: linear-gradient(180deg, #1a99a2, #0e727c);
+  border-color: color-mix(in srgb, var(--petrol-lit) 75%, transparent);
   box-shadow:
-    0 0 28px color-mix(in srgb, var(--neon) 40%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 42%, transparent);
+    0 0 30px color-mix(in srgb, var(--petrol-lit) 32%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 28%, transparent);
 }
 
 .button--ghost {

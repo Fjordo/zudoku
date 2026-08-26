@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { CELL_COUNT, DIGITS, EMPTY_CELL, SIZE, boxOf, colOf, rowOf } from '@zudoku/shared';
+import { CELL_COUNT, DIGITS, EMPTY_CELL, boxOf, colOf, rowOf } from '@zudoku/shared';
 import { useI18n } from '../../../i18n';
 import { hasNote, hintCells, type Flash, type GameState, type Highlight } from '../gameState';
 
@@ -109,8 +109,6 @@ const Cell = memo(function Cell({
     explained && 'cell--explained',
     flash === 'locked' && 'cell--locked',
     flash === 'rejected' && 'cell--rejected',
-    colOf(index) % 3 === 2 && colOf(index) !== SIZE - 1 && 'cell--edge-right',
-    rowOf(index) % 3 === 2 && rowOf(index) !== SIZE - 1 && 'cell--edge-bottom',
   ]
     .filter(Boolean)
     .join(' ');

@@ -181,9 +181,50 @@
    * the board takes whatever height is left over.
    */
   --board-reserve: 300px;
-  width: min(100%, 68vh, 100dvh - var(--board-reserve));
+  /*
+   * How much room the board is offered. Every layout below states this and
+   * nothing else; the width itself is worked out once, further down.
+   */
+  --board-avail: min(100%, 68vh, 100dvh - var(--board-reserve));
+
+  /*
+   * The plate is ruled in two weights and nothing else: a hairline inside a
+   * 3x3 box, and a heavier rule between boxes — which is also the frame around
+   * the whole plate, so the outer edge and the inner structure agree.
+   *
+   * --dp is one device pixel. Widths are stated in it rather than in CSS
+   * pixels because a rule is only ever crisp on whole device pixels, and on a
+   * fractional display ratio the two are not the same thing.
+   */
+  --dp: 1px;
+  --hair: 1px;
+  /* How far a box rule reaches past the hairline, on each side of it. */
+  --edge: 1px;
+  --frame: calc(var(--hair) + 2 * var(--edge));
+
+  width: var(--board-avail);
   margin: 0 auto;
   transition: width 160ms ease;
+}
+
+/*
+ * Snapping. Nine cells share whatever is left after the frame and the
+ * hairlines, and unless that remainder divides into whole device pixels the
+ * nine strides all land on different subpixel offsets — the browser then draws
+ * some rules a pixel wide and the next two, which is exactly the uneven grid
+ * this rounds away. The board gives up the few pixels that do not divide.
+ */
+@supports (width: round(down, 3px, 2px)) {
+  .board__frame {
+    --dp: calc(1px / var(--dpr, 1));
+    --hair: max(var(--dp), round(1px, var(--dp)));
+    --edge: max(var(--dp), round(1px, var(--dp)));
+    --board-chrome: calc(2 * var(--frame) + 8 * var(--hair));
+    width: calc(
+      round(down, (var(--board-avail) - var(--board-chrome)) / 9, var(--dp)) * 9 +
+        var(--board-chrome)
+    );
+  }
 }
 
 /*
@@ -197,13 +238,14 @@
 }
 
 @media (min-width: 861px) {
-  .board__frame,
-  .game--hinted .board__frame {
-    width: min(100%, 68vh);
+  .board__frame {
+    --board-avail: min(100%, 68vh);
   }
 }
 
 .board {
+  /* Holds the separators, which are drawn over the cells. */
+  position: relative;
   display: grid;
   /*
    * Both axes are stated, and stated as minmax(0, 1fr): implicit rows would be
@@ -221,10 +263,11 @@
   -webkit-touch-callout: none;
   aspect-ratio: 1;
   width: 100%;
-  gap: 1px;
-  padding: 3px;
+  /* The hairlines are the plate showing through between the cells. */
+  gap: var(--hair);
   background: var(--rule);
-  border: 1px solid var(--rule-box);
+  /* The frame is a box rule: the plate's edge is ruled like everything inside it. */
+  border: var(--frame) solid var(--rule-box);
   border-radius: var(--radius);
   /*
    * Weight underneath and a fuchsia bloom around it: the plate is lit, and the
@@ -234,6 +277,46 @@
     0 26px 64px rgb(4 2 10 / 62%),
     0 0 70px color-mix(in srgb, var(--neon) 18%, transparent);
   overflow: hidden;
+}
+
+/*
+ * The 3x3 separators, printed over the cells rather than carried as a shadow on
+ * every ninth one. Four rules drawn from one set of positions come out the same
+ * weight as each other and stay centred on the hairline they replace, whatever
+ * the cells underneath them are doing — a shadow per cell could only sit to one
+ * side of the gap, and a lit cell could paint over it.
+ */
+.board::after {
+  content: '';
+  position: absolute;
+  /* The cell area exactly: the frame already rules the outside. */
+  inset: 0;
+  /* Above the paper and its washes, below the outlines that mark a cell. */
+  z-index: 2;
+  pointer-events: none;
+  /* The cell stride, read back off the board's own width. */
+  --cell: calc((100cqw - 8 * var(--hair)) / 9);
+  --rule-1a: calc(3 * var(--cell) + 2 * var(--hair) - var(--edge));
+  --rule-1b: calc(3 * var(--cell) + 3 * var(--hair) + var(--edge));
+  --rule-2a: calc(6 * var(--cell) + 5 * var(--hair) - var(--edge));
+  --rule-2b: calc(6 * var(--cell) + 6 * var(--hair) + var(--edge));
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent var(--rule-1a),
+      var(--rule-box) var(--rule-1a) var(--rule-1b),
+      transparent var(--rule-1b) var(--rule-2a),
+      var(--rule-box) var(--rule-2a) var(--rule-2b),
+      transparent var(--rule-2b)
+    ),
+    linear-gradient(
+      180deg,
+      transparent var(--rule-1a),
+      var(--rule-box) var(--rule-1a) var(--rule-1b),
+      transparent var(--rule-1b) var(--rule-2a),
+      var(--rule-box) var(--rule-2a) var(--rule-2b),
+      transparent var(--rule-2b)
+    );
 }
 
 .cell {
@@ -254,20 +337,6 @@
   font-size: 6cqw;
   font-weight: 600;
   transition: background 110ms ease;
-}
-
-.cell--edge-right {
-  box-shadow: 2px 0 0 var(--rule-box);
-  z-index: 1;
-}
-
-.cell--edge-bottom {
-  box-shadow: 0 2px 0 var(--rule-box);
-  z-index: 1;
-}
-
-.cell--edge-right.cell--edge-bottom {
-  box-shadow: 2px 0 0 var(--rule-box), 0 2px 0 var(--rule-box);
 }
 
 /*
@@ -432,13 +501,13 @@
 .cell--explained {
   outline: 2px solid var(--blue);
   outline-offset: -2px;
-  z-index: 2;
+  z-index: 3;
 }
 
 .cell:focus-visible {
   outline: 2px solid var(--graphite);
   outline-offset: -2px;
-  z-index: 3;
+  z-index: 4;
 }
 
 .cell__value {
@@ -651,8 +720,8 @@
 .overlay {
   position: absolute;
   inset: 0;
-  /* Above every cell: separators sit at 1, hint outline at 2, focus ring at 3. */
-  z-index: 4;
+  /* Above every cell: separators sit at 2, hint outline at 3, focus ring at 4. */
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -747,7 +816,6 @@
    * enough to sit inset.
    */
   .board {
-    padding: 2px;
     border-radius: 0;
   }
 
@@ -827,9 +895,8 @@
    * close to square, where a board as wide as the device would be taller than
    * the screen; on a phone it never bites.
    */
-  .board__frame,
-  .game--hinted .board__frame {
-    width: min(100%, 100dvh - 132px);
+  .board__frame {
+    --board-avail: min(100%, 100dvh - 132px);
   }
 
   /*
@@ -931,14 +998,12 @@
   }
 
   .game .board {
-    padding: 3px;
     border-radius: var(--radius);
   }
 
   /* The board now answers to the title bar alone. */
-  .board__frame,
-  .game--hinted .board__frame {
-    width: min(56vw, 100dvh - 64px);
+  .board__frame {
+    --board-avail: min(56vw, 100dvh - 64px);
     margin: 0;
   }
 
