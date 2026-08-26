@@ -199,6 +199,8 @@ p {
   border-radius: var(--radius);
   background: var(--surface);
   font-weight: 600;
+  /* A label never breaks across two lines: the topbar has to stay one row tall. */
+  white-space: nowrap;
   transition: background 120ms ease, transform 120ms ease, border-color 120ms ease;
 }
 
