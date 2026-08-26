@@ -9,6 +9,10 @@ primary_region = "cdg"
 [env]
   NODE_ENV = "production"
   PORT = "8080"
+  # V8 sizes the old space from the memory it sees, and on a 256mb machine that
+  # guess sits close enough to the cgroup limit that a burst is killed rather
+  # than collected. Capping it below the limit keeps the GC in front of the OOM.
+  NODE_OPTIONS = "--max-old-space-size=192"
   # Traffic only ever reaches the app through the Fly proxy, so the socket peer
   # is the proxy itself and every visitor would share one bucket: the per-address
   # limits would then act as a global cap. The proxy overwrites Fly-Client-IP, so
@@ -20,7 +24,9 @@ primary_region = "cdg"
   force_https = true
   auto_stop_machines = "suspend"
   auto_start_machines = true
-  min_machines_running = 1
+  # A minimum of one pins the last machine to "started", which leaves the suspend
+  # above with nothing to act on: zero is what lets an empty app go to sleep.
+  min_machines_running = 0
   processes = ["app"]
 
   [http_service.concurrency]
@@ -37,4 +43,4 @@ primary_region = "cdg"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "512mb"
+  memory = "256mb"
