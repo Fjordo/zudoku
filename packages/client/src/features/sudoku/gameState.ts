@@ -150,6 +150,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
 function applyInput(state: GameState, digit: number): GameState {
   const index = state.selected;
+  // A digit placed nine times is spent: it leaves the keypad, and the keyboard
+  // shortcut for it goes quiet too, so it can never cost a life by accident.
+  if (remainingForDigit(state, digit) <= 0) return state;
+
   const next = { ...state, activeDigit: digit };
   if (state.status !== 'playing' || index === null || isLocked(state, index)) return next;
 

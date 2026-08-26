@@ -113,6 +113,23 @@ describe('entering digits', () => {
     expect(state.status).toBe('won');
     expect(remainingForDigit(state, 4)).toBe(0);
   });
+
+  it('refuses a digit that is already placed nine times', () => {
+    let state = newGame();
+    // Fill every 4 on the grid, so the digit is spent.
+    state.cells.forEach((value, index) => {
+      if (value === EMPTY_CELL && solution[index] === 4) {
+        state = run(state, { type: 'select', index }, { type: 'input', digit: 4 });
+      }
+    });
+    expect(remainingForDigit(state, 4)).toBe(0);
+
+    const selected = run(state, { type: 'select', index: firstEmpty(state) });
+    const spent = run(selected, { type: 'input', digit: 4 });
+
+    // Nothing at all happens: no entry, no mistake, not even a highlight.
+    expect(spent).toBe(selected);
+  });
 });
 
 describe('notes', () => {

@@ -460,12 +460,21 @@
 
 /* --- number pad --- */
 
+/*
+ * The keypad holds only the digits still worth entering, so it empties as the
+ * board fills. Keys keep the width they had when there were nine of them and
+ * the row simply gets shorter, centred — the console reads as work remaining,
+ * not as a fixed instrument with dead keys on it.
+ */
 .pad {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   user-select: none;
   -webkit-user-select: none;
-  gap: var(--space-1);
+  --pad-cols: 9;
+  --pad-gap: var(--space-1);
+  gap: var(--pad-gap);
 }
 
 .pad__key {
@@ -474,6 +483,9 @@
   align-items: center;
   justify-content: center;
   gap: 1px;
+  /* The half pixel keeps a full row from wrapping on a sub-pixel rounding. */
+  flex: 0 1 calc((100% - (var(--pad-cols) - 1) * var(--pad-gap)) / var(--pad-cols) - 0.5px);
+  min-width: 0;
   min-height: 54px;
   padding: 0;
   border: 1px solid var(--line);
@@ -487,11 +499,6 @@
   border-color: color-mix(in srgb, var(--beam) 65%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--beam) 30%, var(--surface)), var(--surface));
   box-shadow: 0 0 16px color-mix(in srgb, var(--beam) 30%, transparent);
-}
-
-/* Every copy of this digit is placed: nothing left to enter, still worth lighting. */
-.pad__key--done {
-  color: var(--text-muted);
 }
 
 /* A finished or paused game must read as unavailable, not just be inert. */
@@ -594,7 +601,16 @@
   }
 
   .game .topbar {
-    min-height: 40px;
+    min-height: 38px;
+  }
+
+  /* Every row of chrome above the board is width the board does not get. */
+  .game .topbar .button {
+    min-height: 38px;
+  }
+
+  .game .language__option {
+    min-height: 34px;
   }
 
   .game .topbar__title {
@@ -630,11 +646,11 @@
   }
 
   .board__frame {
-    --board-reserve: 252px;
+    --board-reserve: 220px;
   }
 
   .game--hinted .board__frame {
-    --board-reserve: 332px;
+    --board-reserve: 300px;
   }
 
   /*
@@ -648,16 +664,43 @@
     border-radius: 0;
   }
 
+  /*
+   * The hint docks over the bottom of the board, so it costs exactly the rows
+   * it needs and no more.
+   */
+  .hint {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .hint__body {
+    font-size: 0.88rem;
+  }
+
+  .hint__tag {
+    font-size: 0.64rem;
+  }
+
+  .hint__actions .button {
+    min-height: 34px;
+    padding: 0 var(--space-2);
+    font-size: 0.82rem;
+  }
+
   .pad {
-    gap: 5px;
+    --pad-gap: 5px;
   }
 
   .pad__key {
-    min-height: 50px;
+    min-height: 48px;
   }
 
+  /*
+   * Secondary to the keypad, so they sit at the tap-target floor rather than
+   * above it and hand the difference to the board.
+   */
   .controls__button {
-    min-height: 52px;
+    min-height: 48px;
     font-size: 0.72rem;
   }
 
@@ -679,48 +722,49 @@
 
   .game .game__actions .button {
     flex: 1 1 0;
-    min-height: 48px;
+    min-height: 44px;
     padding: 0 var(--space-2);
   }
 }
 
 /*
- * Phones held upright: the keypad is the instrument you actually play, so it
- * stops pretending to be a strip of nine hairline keys. Two rows, thumb-sized,
- * the second centred under the first — the board gives up the height for it.
+ * Phones held upright: the board takes the width of the device and the console
+ * below fits around it, not the other way round. Fitting the whole console on
+ * screen used to cost the board a quarter of its width; now the plate is sized
+ * first, the keypad stays under the thumb by sticking to the bottom, and
+ * whatever is left over — pause, a new puzzle — is a short scroll away.
  */
 @media (max-width: 600px) and (orientation: portrait) {
-  /* Keypad, controls and the two game actions all come out of the board's height. */
-  .board__frame {
-    --board-reserve: 390px;
-  }
-
+  /*
+   * Full width, edge to edge. The height term is only a guard for viewports
+   * close to square, where a board as wide as the device would be taller than
+   * the screen; on a phone it never bites.
+   */
+  .board__frame,
   .game--hinted .board__frame {
-    --board-reserve: 470px;
+    width: min(100%, 100dvh - 132px);
   }
 
+  /*
+   * The keypad is still the instrument you play, so it keeps its two rows of
+   * thumb-sized keys — it just spends no more height than it has to.
+   */
   .pad {
-    grid-template-columns: repeat(10, 1fr);
-    gap: var(--space-2);
+    --pad-cols: 5;
+    --pad-gap: 6px;
   }
 
   .pad__key {
-    grid-column: auto / span 2;
-    min-height: 62px;
+    min-height: 54px;
     gap: 2px;
   }
 
-  /* Nine keys over two rows: the row of four sits centred under the row of five. */
-  .pad__key:nth-child(6) {
-    grid-column: 2 / span 2;
-  }
-
   .pad__digit {
-    font-size: 1.7rem;
+    font-size: 1.55rem;
   }
 
   .pad__count {
-    font-size: 0.68rem;
+    font-size: 0.66rem;
   }
 }
 
@@ -731,11 +775,40 @@
   }
 }
 
-/* Landscape phones: board on the left, input on the right, nothing scrolls. */
+/* Landscape phones: board on the left, everything else stacked on the right. */
 @media (max-height: 560px) and (orientation: landscape) {
+  /*
+   * Held sideways there is no height to spare and width everywhere, so only
+   * the title bar is allowed to sit above the board: the readings move into
+   * the column beside it, with the keypad under them. The two wrappers step
+   * out of the way with display: contents so that the board and the console
+   * can be placed on the page grid directly.
+   */
   .page.game {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas:
+      'top   top'
+      'board stats'
+      'board input'
+      'board aside';
+    align-content: start;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
+  }
+
+  .game .topbar {
+    grid-area: top;
+  }
+
+  .game .stats {
+    grid-area: stats;
+  }
+
+  .game__layout,
+  .game__main {
+    display: contents;
   }
 
   .game .topbar {
@@ -763,31 +836,38 @@
     min-height: 32px;
   }
 
-  .game__main {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: var(--space-3);
-  }
-
+  /* Sideways the board sits inset, so it keeps its corners and its gutter. */
   .game__board {
+    grid-area: board;
+    align-self: start;
     margin-inline: 0;
   }
 
+  .game .board {
+    padding: 3px;
+    border-radius: var(--radius);
+  }
+
+  /* The board now answers to the title bar alone. */
   .board__frame,
   .game--hinted .board__frame {
-    width: min(52vw, calc(100dvh - 116px));
+    width: min(56vw, 100dvh - 64px);
     margin: 0;
   }
 
   .game__input {
+    grid-area: input;
     position: static;
-    flex: 1 1 auto;
     padding: 0;
     background: none;
   }
 
+  .game__aside {
+    grid-area: aside;
+  }
+
   .pad {
-    grid-template-columns: repeat(5, 1fr);
+    --pad-cols: 5;
   }
 
   .controls {
