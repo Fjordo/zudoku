@@ -59,9 +59,9 @@ export function SoloPage({ difficulty, navigate }: SoloPageProps) {
   }, [difficulty, reloadToken]);
 
   const startNewGame = useCallback(() => {
-    clearSoloGame();
+    clearSoloGame(difficulty);
     setReloadToken((token) => token + 1);
-  }, []);
+  }, [difficulty]);
 
   if (error) {
     return (

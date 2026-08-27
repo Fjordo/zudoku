@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DIFFICULTY_PROFILES, type Difficulty } from '@zudoku/shared';
 import { useTimer } from '../../../hooks/useTimer';
 import { useI18n } from '../../../i18n';
@@ -39,26 +39,62 @@ export function SoloGame({
   const [paused, setPaused] = useState(false);
   // Anchoring the start in the past restores the elapsed time of a saved game.
   const [startedAt, setStartedAt] = useState(() => Date.now() - restoredElapsedMs);
-  const elapsedMs = useTimer(startedAt, !paused && state.status === 'playing');
+  const running = !paused && state.status === 'playing';
+  const elapsedMs = useTimer(startedAt, running);
 
-  // Mirrored in a ref so saving does not run on every timer tick.
-  const elapsedRef = useRef(elapsedMs);
+  // Mirrored in a ref so saving does not run on every timer tick and the
+  // visibility listener can stay mounted for the whole game.
+  const latest = useRef({ difficulty, state, elapsedMs, running });
   useEffect(() => {
-    elapsedRef.current = elapsedMs;
-  }, [elapsedMs]);
+    latest.current = { difficulty, state, elapsedMs, running };
+  });
 
-  const pause = (next: boolean) => {
-    if (!next) setStartedAt(Date.now() - elapsedRef.current);
+  const persist = useCallback(() => {
+    const { difficulty: level, state: current, elapsedMs: elapsed } = latest.current;
+    if (current.status !== 'playing') return;
+    saveSoloGame({ version: 2, difficulty: level, state: current, elapsedMs: elapsed, savedAt: Date.now() });
+  }, []);
+
+  const pause = useCallback((next: boolean) => {
+    if (!next) setStartedAt(Date.now() - latest.current.elapsedMs);
     setPaused(next);
-  };
+  }, []);
 
   useEffect(() => {
-    if (state.status === 'playing') {
-      saveSoloGame({ version: 2, difficulty, state, elapsedMs: elapsedRef.current, savedAt: Date.now() });
-    } else {
-      clearSoloGame();
-    }
-  }, [difficulty, state]);
+    if (state.status === 'playing') persist();
+    else clearSoloGame(difficulty);
+  }, [difficulty, persist, state]);
+
+  /**
+   * The clock runs on the wall, and a phone can leave a tab in the background
+   * for hours: the game pauses itself and hands back the time spent away, so a
+   * puzzle left open overnight is not charged for the night. The save is
+   * written here too, because nothing is guaranteed to run once the tab is
+   * frozen — that is what a game reopened days later has to come back from.
+   */
+  useEffect(() => {
+    let hiddenAt: number | null = null;
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        if (latest.current.running) {
+          hiddenAt = Date.now();
+          pause(true);
+        }
+        persist();
+        return;
+      }
+      if (hiddenAt === null) return;
+      // The clock is still anchored before the pause, so pushing the anchor
+      // forward by the time away is what keeps it off the player's watch.
+      const away = Date.now() - hiddenAt;
+      hiddenAt = null;
+      setStartedAt((start) => start + away);
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [pause, persist]);
 
   const overlay =
     state.status === 'playing' ? (

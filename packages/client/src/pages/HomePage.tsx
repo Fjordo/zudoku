@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DIFFICULTIES, DIFFICULTY_PROFILES, MAX_MISTAKES, type Difficulty } from '@zudoku/shared';
 import { About } from '../components/About';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
-import { loadSoloGame } from '../features/sudoku/soloStorage';
+import { latestSavedDifficulty, loadSoloGame } from '../features/sudoku/soloStorage';
 import { useI18n } from '../i18n';
 import type { MessageKey } from '../i18n/en';
 import './pages.css';
@@ -13,7 +13,9 @@ interface HomePageProps {
 
 export function HomePage({ navigate }: HomePageProps) {
   const { t } = useI18n();
-  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  // The board left half solved is the one the home screen offers first: with a
+  // save per difficulty, a fixed default would hide the game still in progress.
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => latestSavedDifficulty() ?? 'easy');
   const saved = loadSoloGame(difficulty);
 
   return (
