@@ -1,7 +1,18 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * The app ships as one unit, so the root manifest is the only place its version
+ * is written — the workspace manifests carry none. Both `src` (dev) and `dist`
+ * (built) sit two levels under `packages/`, and the Dockerfile copies the root
+ * manifest into the image, so this resolves the same way everywhere.
+ */
+const { version } = JSON.parse(
+  readFileSync(path.resolve(here, '../../../package.json'), 'utf8'),
+) as { version: string };
 
 const originList = (value: string | undefined): readonly string[] =>
   (value ?? '')
@@ -10,6 +21,8 @@ const originList = (value: string | undefined): readonly string[] =>
     .filter((origin) => origin.length > 0);
 
 export const config = {
+  /** Reported by /healthz so a deployed machine can be matched to a build. */
+  version,
   isProduction: process.env.NODE_ENV === 'production',
   port: Number(process.env.PORT ?? 8080),
   host: process.env.HOST ?? '0.0.0.0',

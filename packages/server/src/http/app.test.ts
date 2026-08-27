@@ -1,4 +1,7 @@
 import { createServer, type Server } from 'node:http';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { RoomManager } from '../rooms/roomManager.js';
 import { contentSecurityPolicy, createApp } from './app.js';
@@ -28,6 +31,18 @@ describe('http surface', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(response.headers.get('x-frame-options')).toBe('DENY');
     expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+  });
+
+  it('reports the version from the root manifest, the only place it is written', async () => {
+    const here = path.dirname(fileURLToPath(import.meta.url));
+    const { version } = JSON.parse(
+      readFileSync(path.resolve(here, '../../../../package.json'), 'utf8'),
+    ) as { version: string };
+
+    const body = (await (await fetch(`${base}/healthz`)).json()) as { version: string };
+
+    expect(version).toMatch(/^\d+\.\d+\.\d+/);
+    expect(body.version).toBe(version);
   });
 
   it('sends HSTS only for requests that reached the proxy over https', async () => {

@@ -107,7 +107,7 @@ fly deploy
 ```
 
 The server keeps rooms in memory, so run a single machine (`min_machines_running = 1`) or move the
-room registry to a shared store before scaling out. `/healthz` reports status, room count and uptime.
+room registry to a shared store before scaling out. `/healthz` reports status, version, room count and uptime.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |

@@ -62,7 +62,7 @@ export function createApp(rooms: RoomManager): Express {
   });
 
   app.get('/healthz', (_req, res) => {
-    res.json({ status: 'ok', rooms: rooms.size, uptime: process.uptime() });
+    res.json({ status: 'ok', version: config.version, rooms: rooms.size, uptime: process.uptime() });
   });
 
   const indexFile = path.join(config.clientDir, 'index.html');

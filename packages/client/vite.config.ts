@@ -1,10 +1,23 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const SERVER_ORIGIN = 'http://localhost:8080';
 
+// The colophon quotes the shipped build, so the number comes from the manifest
+// that produced it rather than from a constant someone has to remember to bump.
+// The workspace manifests carry no version of their own: the app ships as one
+// unit, so the root package.json is the only place the number is written.
+const { version } = JSON.parse(
+  readFileSync(fileURLToPath(new URL('../../package.json', import.meta.url)), 'utf8'),
+) as { version: string };
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   plugins: [
     react(),
     VitePWA({

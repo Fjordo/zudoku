@@ -143,3 +143,128 @@
 .bullets li::marker {
   color: color-mix(in srgb, var(--accent) 80%, transparent);
 }
+
+/* --- the colophon --- */
+
+/*
+ * The `?` is a peer of the language pill, not a control: same hairline, same
+ * ground, same muted type. Nothing in the header may compete with the slab
+ * that starts a game.
+ */
+.about__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--room) 45%, var(--surface));
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.about__trigger:hover {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+}
+
+.about__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(env(safe-area-inset-top) + var(--space-5)) var(--space-5)
+    calc(env(safe-area-inset-bottom) + var(--space-5));
+  background: color-mix(in srgb, var(--room) 82%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: about-fade 140ms ease-out;
+}
+
+.about__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 320px;
+  animation: about-rise 200ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+/*
+ * A piece of porcelain carries its maker's mark on the underside: who made it,
+ * which year, and a line of small print. That is what an about box is, so the
+ * card is a plate — ruled at its edge like the board, printed in the one ink,
+ * and the only lit thing on screen while it is open.
+ */
+.about__plate {
+  width: 100%;
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  text-align: center;
+  background: var(--porcelain);
+  border: 2px solid var(--rule-box);
+  border-radius: var(--radius);
+  color: var(--graphite);
+  box-shadow:
+    0 26px 64px rgb(4 2 10 / 62%),
+    0 0 70px color-mix(in srgb, var(--neon) 18%, transparent);
+}
+
+.about__wordmark {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.about__maker {
+  margin-top: var(--space-2);
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--graphite) 66%, var(--porcelain));
+}
+
+/* The same hairline that separates one cell from the next. */
+.about__rule {
+  width: 56px;
+  height: 0;
+  margin: var(--space-4) auto;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.about__version {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--aqua-ink);
+}
+
+.about__fineprint {
+  margin-top: var(--space-2);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--graphite) 55%, var(--porcelain));
+}
+
+@keyframes about-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes about-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}

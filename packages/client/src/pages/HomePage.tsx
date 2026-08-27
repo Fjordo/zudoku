@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DIFFICULTIES, DIFFICULTY_PROFILES, MAX_MISTAKES, type Difficulty } from '@zudoku/shared';
+import { About } from '../components/About';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { loadSoloGame } from '../features/sudoku/soloStorage';
 import { useI18n } from '../i18n';
@@ -18,6 +19,7 @@ export function HomePage({ navigate }: HomePageProps) {
   return (
     <div className="page home">
       <header className="topbar topbar--end">
+        <About />
         <LanguageSwitcher />
       </header>
 

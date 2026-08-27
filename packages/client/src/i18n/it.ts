@@ -9,6 +9,11 @@ export const it: Dictionary = {
   'common.you': 'tu',
   'common.language': 'Lingua',
 
+  'about.open': 'Informazioni su Zudoku',
+  'about.maker': 'Creato da Fjordo',
+  'about.version': 'Versione {version}',
+  'about.fineprint': '© 2026 Fjordo · Solo per divertimento',
+
   'home.tagline': 'Puzzle in solitaria, o una gara con gli amici sulla stessa griglia.',
   'home.solo': 'Solitario',
   'home.difficulty': 'Difficoltà',

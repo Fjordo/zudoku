@@ -7,6 +7,11 @@ export const en = {
   'common.you': 'you',
   'common.language': 'Language',
 
+  'about.open': 'About Zudoku',
+  'about.maker': 'Made by Fjordo',
+  'about.version': 'Version {version}',
+  'about.fineprint': '© 2026 Fjordo · Fun use only',
+
   'home.tagline': 'Solo puzzles, or a race against your friends on the very same grid.',
   'home.solo': 'Solo',
   'home.difficulty': 'Difficulty',
