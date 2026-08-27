@@ -65,7 +65,7 @@ export function SoloPage({ difficulty, navigate }: SoloPageProps) {
 
   if (error) {
     return (
-      <div className="page">
+      <div className="page page--solo">
         <div className="card stack">
           <p>{t(error as MessageKey)}</p>
           <button type="button" className="button button--primary" onClick={startNewGame}>
@@ -78,7 +78,7 @@ export function SoloPage({ difficulty, navigate }: SoloPageProps) {
 
   if (!session) {
     return (
-      <div className="page">
+      <div className="page page--solo">
         <div className="card stack" aria-busy="true">
           <h2>
             {t('game.loading', { difficulty: t(`difficulty.${difficulty}` as MessageKey).toLowerCase() })}

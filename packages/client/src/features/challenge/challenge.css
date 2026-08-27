@@ -1,5 +1,10 @@
 /* Lobby, invite plate and live standings. */
 
+/* The whole challenge flow is the human mode, and says so. */
+.page--challenge {
+  --accent: var(--neon);
+}
+
 .invite {
   align-items: center;
   text-align: center;
@@ -10,7 +15,7 @@
   font-size: clamp(1.9rem, 11vw, 2.7rem);
   letter-spacing: 0.22em;
   font-weight: 700;
-  color: var(--bone);
+  color: var(--text);
   /* The code is the thing you read out loud: lit like a marquee. */
   text-shadow: 0 0 28px color-mix(in srgb, var(--neon) 60%, transparent);
   /* Balances the trailing letter-spacing so the code stays centred. */
@@ -66,13 +71,22 @@
   align-items: center;
   gap: var(--space-2);
   font-weight: 600;
-  color: var(--bone);
+  color: var(--text);
 }
 
+/*
+ * The app confirming a player is in, on a screen that is otherwise entirely
+ * yours and the other players': the one aqua thing in the challenge.
+ */
 .players__ready {
-  color: var(--blue-light);
+  color: var(--aqua);
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+/* Dropped mid-race: the row dims rather than disappears — their board still counts. */
+.players__row--away {
+  opacity: 0.62;
 }
 
 .badge--win {
@@ -100,4 +114,86 @@
 .progress__bar--out {
   background: color-mix(in srgb, var(--neon) 22%, var(--line));
   box-shadow: none;
+}
+
+/*
+ * A dropped link, said once. The card floats over the game instead of
+ * blocking it — the board is still playable while it shows — and it withdraws
+ * by itself when the socket comes back, so a blip costs no taps at all.
+ */
+.drop {
+  position: fixed;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  width: min(24rem, calc(100% - var(--space-5) * 2));
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 92%, var(--room));
+  box-shadow: var(--shadow);
+  animation: drop-rise 260ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.drop__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.drop__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* The same lamp as the lobby pill: out while the link is gone, lit on return. */
+.drop__lamp {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--text-muted);
+  transition: background 320ms ease, box-shadow 320ms ease;
+}
+
+.drop--back .drop__lamp {
+  background: var(--neon);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--neon) 70%, transparent);
+}
+
+/* Stacked, so the two labels never fight for one phone-width row. */
+.drop__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.drop__actions .button {
+  justify-content: center;
+}
+
+@keyframes drop-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop {
+    animation: none;
+  }
+
+  .drop__lamp {
+    transition: none;
+  }
 }

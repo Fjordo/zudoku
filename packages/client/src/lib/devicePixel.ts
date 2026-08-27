@@ -15,7 +15,13 @@ export function publishDevicePixelRatio(): void {
   let watch: MediaQueryList | null = null;
 
   const apply = () => {
-    const ratio = window.devicePixelRatio || 1;
+    /*
+     * Rounded, because a zoomed page reports the ratio with float noise on the
+     * end — 1.0000000149 instead of 1 — and rounding a length down to a
+     * multiple of 0.99999999px lands nowhere near a whole pixel. Three decimals
+     * keeps every real ratio a display can have and drops the rest.
+     */
+    const ratio = Math.round((window.devicePixelRatio || 1) * 1000) / 1000;
     document.documentElement.style.setProperty('--dpr', String(ratio));
     watch?.removeEventListener('change', apply);
     /*

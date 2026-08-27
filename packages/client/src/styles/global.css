@@ -1,18 +1,29 @@
 /*
  * Theme: a porcelain plate on a lit console, in a dark room.
  *
- * Two colours carry the game, and the split between them is the whole system:
+ * TWO VOICES, and the split between them is the whole system:
  *
- *   fuchsia is you   — where your cursor is, what you wrote, the keys you press
- *   blue is the plate answering — the digit in play and every cell holding it,
- *                      the hints, the worked examples in the guide
+ *   fuchsia is you    — where your cursor is, what you wrote, the keys you press
+ *   aqua is the puzzle — every answer the plate gives you back
  *
- * Each one is INK on the porcelain and LIGHT in the room: dense enough to read
- * on cream, bright enough to glow on plum. That is why press a key and the
- * board turns blue — you asked, and it answered.
+ * Each voice is INK on the porcelain and LIGHT in the room: dense enough to
+ * read on cream, bright enough to glow on plum. That is why you press a key
+ * and the board turns aqua — you asked, and it answered.
  *
- * Petrol is the third colour and it never appears on the plate: it belongs to
- * the one control that starts a game, and to nothing else.
+ * The two are far apart on the wheel, and the one rule that keeps them from
+ * reading as a rainbow is that AQUA IS NEVER USED AT HALF SATURATION. In the
+ * room it is nearly a tint of white — a pale slab, a hairline, a halo; on the
+ * plate it is nearly black. A mid-saturation teal block is what makes a page
+ * shout, and there is none in here.
+ *
+ * The same split names the modes, because it is already true of them: solo is
+ * you and the puzzle, so its chrome is aqua; the challenge is you and other
+ * people, so its chrome is fuchsia — the human colour. Every surface states
+ * its mode through --accent and nothing else has to know which screen it is on.
+ *
+ * The plate has no voice of its own. Porcelain, its printed rules and the
+ * graphite of the clues are paper and ink, and every tint on it is a mix of
+ * those with one of the two voices — never a third colour.
  *
  * The last rule is what replaces the old error colours: everything you do adds
  * light, every mistake takes it away. A refused digit does not turn red, the
@@ -22,7 +33,6 @@
   /* --- the room: everything that is not the plate --- */
   --room: #150e1f;
   --surface: #241933;
-  --surface-lift: #30224a;
   --line: #382a4e;
 
   /* --- the plate: porcelain, the only lit surface in the app --- */
@@ -32,46 +42,47 @@
   --rule: #c4b188;
   /* The 3x3 separators carry the structure of the puzzle, so they are ink. */
   --rule-box: #57493a;
-  /* Ink: the printed clues, and every word set on the plate. */
-  --graphite: #241b31;
+  /*
+   * The one ink in the app: the printed clues, every word set on the plate, and
+   * the digit on a lit key. There is no second near-black — a key face and a
+   * sheet of porcelain are both light, so both take the same ink.
+   */
+  --graphite: #1c1226;
 
   /* --- fuchsia: you. Ink on the plate, light in the room. --- */
+  /* Dense enough to read as writing on cream. */
   --rose: #c4136e;
+  /* Bright enough to glow on plum. */
   --neon: #ff419e;
-  /* The face of a lit key: bright enough for dark type to read on it. */
-  --key: #ee3298;
-  --key-top: #ff64b2;
-  /* Sits on top of fuchsia — the keycap digit, the selected cell's value. */
-  --on-neon: #2b0a1d;
+  /* The keycap: one colour lit from its top edge, not two more colours. */
+  --key: color-mix(in srgb, var(--neon) 92%, var(--graphite));
+  --key-top: color-mix(in srgb, var(--neon) 78%, #ffffff);
+
+  /* --- aqua: the puzzle. The same two registers, at the two extremes. --- */
+  /* Light in the room: labels, rims, halos, and the face of a primary slab. */
+  --aqua: #5fe3d0;
+  /* Ink on the plate: a digit the puzzle filled in, and the ring around a match. */
+  --aqua-ink: #0a5d4a;
 
   /*
-   * --- petrol: the way in ---
+   * --- violet: the guide's notation, and nowhere else ---
    *
-   * The one control that starts something — play, resume, join, deal another
-   * puzzle — is not a digit key and no longer dressed as one. Fuchsia is what
-   * you write with once you are inside; petrol is the door. Deep enough to
-   * stay quiet next to the lit keypad, lit enough along its top edge to read
-   * as the thing to press.
+   * The worked examples strike out candidates and mark the cell a technique
+   * rules out. That is a teaching code, not the app's identity, so it keeps a
+   * hue of its own — and it never leaves the guide.
    */
-  --petrol: #0b5f68;
-  --petrol-top: #14818a;
-  --petrol-lit: #2bb3ac;
-  --on-petrol: #eafaf7;
-
-  /* --- blue: the plate answering. Same two registers. --- */
-  /*
-   * Deep enough to belong to the room rather than sit on top of it — this is
-   * the same depth as the plum around it, just cold instead of warm.
-   */
-  --blue: #1d3f8e;
-  --blue-light: #5a90ff;
+  --violet: #5e2ea3;
+  --violet-light: #ab72f5;
 
   /* --- type in the room --- */
-  --bone: #f4eee1;
   --text: #efe8f6;
   --text-muted: #a99ec0;
 
-  /* Accent of the current surface. The plate switches it to ink. */
+  /*
+   * The voice of the current surface: every section and both game screens set
+   * it, and the controls on them light up in whatever it says. Fuchsia is the
+   * default because a surface that states no mode is simply yours.
+   */
   --accent: var(--neon);
 
   --radius-sm: 8px;
@@ -114,12 +125,13 @@ body {
 
 body {
   /*
-   * Two distant sources, one per ink, kept faint: the room is never the
-   * brightest thing on screen — the plate is.
+   * Two distant sources, one per voice, kept faint: the room is never the
+   * brightest thing on screen — the plate is. They are neighbours on the wheel,
+   * so the wall behind the board reads as one wash rather than two lamps.
    */
   background:
     radial-gradient(72% 52% at 6% -10%, color-mix(in srgb, var(--neon) 15%, transparent), transparent 70%),
-    radial-gradient(64% 48% at 104% 102%, color-mix(in srgb, var(--blue-light) 10%, transparent), transparent 66%),
+    radial-gradient(64% 48% at 104% 102%, color-mix(in srgb, var(--aqua) 9%, transparent), transparent 66%),
     var(--room);
   background-attachment: fixed;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
@@ -224,7 +236,16 @@ p {
   );
 }
 
-.card--solo,
+/*
+ * Where the two modes are offered side by side, each states itself: the section
+ * title, the difficulty you picked, the hairline along the top of the card and
+ * the slab at the bottom all take the same colour, so half a second of looking
+ * is enough to know which one you are in.
+ */
+.card--solo {
+  --accent: var(--aqua);
+}
+
 .card--challenge {
   --accent: var(--neon);
 }
@@ -256,7 +277,8 @@ p {
 }
 
 .button:hover:not(:disabled) {
-  background: var(--surface-lift);
+  /* Lifted toward the room's own white rather than toward a second plum. */
+  background: color-mix(in srgb, var(--surface) 92%, var(--text));
   border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
 }
 
@@ -270,28 +292,37 @@ p {
 }
 
 /*
- * A petrol slab means press this to start playing. It is the only petrol in the
- * app, so wherever it turns up — the home card, a paused board, the end of a
- * match — it is the same promise, and it never competes with the fuchsia you
- * write digits with.
+ * A lit slab means press this to start playing, and it is lit in the accent of
+ * the surface it sits on: aqua where you are about to play the puzzle alone,
+ * fuchsia where you are about to play people. So the button never has to name
+ * the mode — it already is the mode.
+ *
+ * Both faces are light, so both take the app's one ink, and both are cut from
+ * the same stock as a keycap: the other lit face in the app that you press.
  */
 .button--primary {
-  /* Its own focus ring, so the one control off the fuchsia scale keeps its colour. */
-  --accent: var(--petrol-lit);
-  background: linear-gradient(180deg, var(--petrol-top), var(--petrol));
-  border-color: color-mix(in srgb, var(--petrol-lit) 50%, transparent);
-  color: var(--on-petrol);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 84%, #ffffff),
+    var(--accent)
+  );
+  border-color: color-mix(in srgb, var(--graphite) 28%, transparent);
+  color: var(--graphite);
   box-shadow:
-    0 0 22px color-mix(in srgb, var(--petrol-lit) 20%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 22%, transparent);
+    0 0 22px color-mix(in srgb, var(--accent) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent);
 }
 
 .button--primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #1a99a2, #0e727c);
-  border-color: color-mix(in srgb, var(--petrol-lit) 75%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 68%, #ffffff),
+    color-mix(in srgb, var(--accent) 94%, #ffffff)
+  );
+  border-color: color-mix(in srgb, var(--graphite) 34%, transparent);
   box-shadow:
-    0 0 30px color-mix(in srgb, var(--petrol-lit) 32%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 28%, transparent);
+    0 0 30px color-mix(in srgb, var(--accent) 42%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 42%, transparent);
 }
 
 .button--ghost {
@@ -302,7 +333,7 @@ p {
 .button--outline {
   background: color-mix(in srgb, var(--accent) 12%, transparent);
   border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  color: var(--bone);
+  color: var(--text);
 }
 
 .button--outline:hover:not(:disabled) {
@@ -373,7 +404,7 @@ p {
 .segmented__option[aria-pressed='true'] {
   border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   background: color-mix(in srgb, var(--accent) 18%, var(--surface));
-  color: var(--bone);
+  color: var(--text);
   /* A chosen band is lit, the same way a chosen digit on the keypad is. */
   box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 32%, transparent);
 }

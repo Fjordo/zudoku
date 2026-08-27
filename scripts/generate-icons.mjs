@@ -16,9 +16,9 @@ const ROOM = [21, 14, 31];
 const PORCELAIN = [252, 246, 234];
 const PRINT = [239, 230, 210];
 const RULE = [87, 73, 58];
-const GRAPHITE = [36, 27, 49];
+const GRAPHITE = [28, 18, 38];
 const ROSE = [196, 19, 110];
-const BLUE = [29, 63, 142];
+const AQUA = [95, 227, 208];
 
 /** Draws the logo: a 3x3 grid with a few filled cells. */
 function drawIcon(size, { padding }) {
@@ -51,7 +51,7 @@ function drawIcon(size, { padding }) {
     [1, 1, ROSE],
     [2, 2, GRAPHITE],
     [2, 0, PRINT],
-    [0, 2, BLUE],
+    [0, 2, AQUA],
   ];
   for (const [column, row, color] of filled) {
     rect(padding + column * cell + line, padding + row * cell + line, cell - line * 2, cell - line * 2, color);

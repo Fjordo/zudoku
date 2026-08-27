@@ -31,7 +31,7 @@ export function Lobby({ room, playerId, onSetReady, onSetDifficulty, onStart, on
               <span className="players__name">
                 {player.name}
                 {player.isHost && <span className="badge">{t('challenge.host')}</span>}
-                {!player.connected && <span className="badge">{t('challenge.offline')}</span>}
+                {!player.connected && <span className="badge">{t('challenge.disconnected')}</span>}
               </span>
               <span className={player.ready || player.isHost ? 'players__ready' : 'muted small'}>
                 {player.isHost || player.ready ? t('challenge.ready') : t('challenge.waiting')}

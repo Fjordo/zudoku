@@ -11,6 +11,20 @@
  * refuses a wrong one by going dark under it until the shake is done.
  */
 
+/*
+ * A board keeps the colour of the mode it belongs to, so the stats strip, the
+ * result overlay and every focus ring stay in the voice you arrived in. The
+ * keypad is deliberately not on this scale: the digits you write are yours in
+ * either mode, so they stay fuchsia on both screens.
+ */
+.game--solo {
+  --accent: var(--aqua);
+}
+
+.game--challenge {
+  --accent: var(--neon);
+}
+
 .game__layout {
   display: flex;
   gap: var(--space-5);
@@ -42,18 +56,22 @@
     align-items: stretch;
   }
 
+  /* Pause and a fresh puzzle ask for two buttons of height and no more. */
   .game__aside {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     width: 100%;
   }
 
-  /* Phones: keep the keypad reachable with a thumb while the page scrolls. */
+  /*
+   * The keypad sits in the flow. It used to be stuck to the bottom of the
+   * viewport so it stayed under a thumb while the page scrolled, and the price
+   * was that it slid over the grid and over the buttons underneath it. Being in
+   * reach is not worth covering the thing you are playing.
+   */
   .game__input {
-    position: sticky;
-    bottom: 0;
-    z-index: 3;
-    padding: var(--space-2) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
-    background: linear-gradient(180deg, transparent 0%, var(--room) 22%);
+    position: static;
+    padding: 0;
+    background: none;
   }
 }
 
@@ -94,7 +112,7 @@
 .stat__value {
   font-weight: 600;
   font-size: 0.95rem;
-  color: var(--bone);
+  color: var(--text);
 }
 
 /* Lives read faster as lamps than as a fraction, and a mistake puts one out. */
@@ -127,10 +145,10 @@
   gap: var(--space-3);
   padding: var(--space-3);
   border-radius: var(--radius);
-  border: 1px solid color-mix(in srgb, var(--blue-light) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--aqua) 34%, transparent);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--blue-light) 10%, var(--surface)),
+    color-mix(in srgb, var(--aqua) 9%, var(--surface)),
     color-mix(in srgb, var(--room) 70%, transparent)
   );
 }
@@ -149,7 +167,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--blue-light);
+  color: var(--aqua);
 }
 
 .hint__actions {
@@ -224,16 +242,6 @@
       round(down, (var(--board-avail) - var(--board-chrome)) / 9, var(--dp)) * 9 +
         var(--board-chrome)
     );
-  }
-}
-
-/*
- * The hint docks above the keypad, so the board gives up the height it needs.
- * Only in the stacked portrait layout: side by side the keypad has its own column.
- */
-@media (max-width: 860px) and (orientation: portrait) {
-  .game--hinted .board__frame {
-    --board-reserve: 380px;
   }
 }
 
@@ -350,7 +358,7 @@
 
 /* The game filled this one in for you, and says so in its own colour. */
 .cell--hinted {
-  color: var(--blue);
+  color: var(--aqua-ink);
 }
 
 /* The row and column of the selected cell: warmer paper, never a second colour. */
@@ -377,7 +385,7 @@
  * whether it was printed or you wrote it is still the more useful fact.
  */
 .cell--matched {
-  background: color-mix(in srgb, var(--blue-light) 32%, var(--porcelain));
+  background: color-mix(in srgb, var(--aqua) 34%, var(--porcelain));
 }
 
 /*
@@ -389,7 +397,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--blue) 58%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--aqua-ink) 55%, transparent);
 }
 
 /* The one cell you are on: full ink, so it reads from across the room. */
@@ -499,7 +507,7 @@
 }
 
 .cell--explained {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--aqua-ink);
   outline-offset: -2px;
   z-index: 3;
 }
@@ -548,7 +556,7 @@
 
 /* The note for the digit in play is inked like the cells that already hold it. */
 .cell__note--active {
-  color: var(--blue);
+  color: var(--aqua-ink);
   font-weight: 700;
 }
 
@@ -588,11 +596,11 @@
   min-width: 0;
   min-height: 54px;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--on-neon) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--graphite) 30%, transparent);
   border-radius: var(--radius-sm);
   /* Lit from the top edge, the way a keycap catches the light above it. */
   background: linear-gradient(180deg, var(--key-top), var(--key));
-  color: var(--on-neon);
+  color: var(--graphite);
   box-shadow:
     0 0 20px color-mix(in srgb, var(--neon) 26%, transparent),
     inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent);
@@ -600,7 +608,11 @@
 }
 
 .pad__key:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ff85c4, #f8479f);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--key-top) 82%, #ffffff),
+    var(--neon)
+  );
   box-shadow:
     0 0 26px color-mix(in srgb, var(--neon) 38%, transparent),
     inset 0 1px 0 color-mix(in srgb, #ffffff 42%, transparent);
@@ -622,15 +634,15 @@
  * the colour every cell holding that digit has just turned.
  */
 .pad__key[aria-pressed='true'] {
-  border-color: color-mix(in srgb, var(--blue-light) 72%, transparent);
+  border-color: color-mix(in srgb, var(--aqua) 70%, transparent);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--blue-light) 30%, var(--blue)),
-    color-mix(in srgb, var(--blue) 84%, var(--room))
+    color-mix(in srgb, var(--aqua) 26%, var(--aqua-ink)),
+    color-mix(in srgb, var(--aqua-ink) 84%, var(--room))
   );
   color: var(--porcelain);
   box-shadow:
-    0 0 26px color-mix(in srgb, var(--blue-light) 46%, transparent),
+    0 0 26px color-mix(in srgb, var(--aqua) 42%, transparent),
     inset 0 1px 0 color-mix(in srgb, #ffffff 24%, transparent);
 }
 
@@ -642,11 +654,11 @@
 .pad__key[aria-pressed='true']:hover:not(:disabled) {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--blue-light) 44%, var(--blue)),
-    var(--blue)
+    color-mix(in srgb, var(--aqua) 38%, var(--aqua-ink)),
+    var(--aqua-ink)
   );
   box-shadow:
-    0 0 32px color-mix(in srgb, var(--blue-light) 60%, transparent),
+    0 0 32px color-mix(in srgb, var(--aqua) 56%, transparent),
     inset 0 1px 0 color-mix(in srgb, #ffffff 32%, transparent);
 }
 
@@ -672,7 +684,7 @@
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 500;
-  color: var(--on-neon);
+  color: var(--graphite);
 }
 
 /* --- controls --- */
@@ -708,7 +720,7 @@
 .controls__button[aria-pressed='true'] {
   border-color: color-mix(in srgb, var(--neon) 62%, transparent);
   background: color-mix(in srgb, var(--neon) 18%, var(--surface));
-  color: var(--bone);
+  color: var(--text);
 }
 
 .controls__button:disabled {
@@ -740,7 +752,7 @@
   font-size: clamp(1.15rem, 5.5vw, 1.5rem);
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--bone);
+  color: var(--text);
 }
 
 /*
@@ -753,7 +765,8 @@
     --page-gutter: var(--space-2);
     gap: var(--space-2);
     padding-top: var(--space-2);
-    padding-bottom: var(--space-4);
+    /* The last row of controls has to clear the home indicator on its own now. */
+    padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom));
   }
 
   .game .topbar {
@@ -793,36 +806,22 @@
 
   .game__input {
     gap: var(--space-2);
-    padding: var(--space-1) 0 calc(var(--space-2) + env(safe-area-inset-bottom));
   }
 
-  /* Full bleed: the board spans the device, gutter to gutter. */
+  /* Full bleed: the grid is the one thing allowed to touch the screen edge. */
   .game__board {
     margin-inline: calc(-1 * var(--page-gutter));
   }
 
-  .board__frame {
-    --board-reserve: 220px;
-  }
-
-  .game--hinted .board__frame {
-    --board-reserve: 300px;
-  }
-
   /*
    * At the screen edge a rounded plate reads as a card that outgrew its page,
-   * so the corners go square. The hairline frame stays on all four sides: it is
-   * what keeps the outer cells from looking cut off when the board is short
-   * enough to sit inset.
+   * so the corners go square. The frame stays on all four sides: it is what
+   * keeps the outer cells from looking cut off.
    */
   .board {
     border-radius: 0;
   }
 
-  /*
-   * The hint docks over the bottom of the board, so it costs exactly the rows
-   * it needs and no more.
-   */
   .hint {
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
@@ -883,22 +882,38 @@
 }
 
 /*
- * Phones held upright: the board takes the width of the device and the console
- * below fits around it, not the other way round. Fitting the whole console on
- * screen used to cost the board a quarter of its width; now the plate is sized
- * first, the keypad stays under the thumb by sticking to the bottom, and
- * whatever is left over — pause, a new puzzle — is a short scroll away.
+ * Phones held upright: the grid is the app, so it takes the width of the device
+ * and nothing bargains with it for that.
+ *
+ * Everything else — title bar, readings, hint, keypad, controls, pause and a
+ * fresh puzzle — asks for the height it needs and no more, the document ends up
+ * as tall as the sum of those, and the browser scrolls it. That is the whole
+ * mechanism: not one length in here is computed from another.
+ *
+ * Two earlier attempts got this wrong in opposite directions. The first sized
+ * the board from a guessed constant and stuck the keypad over the grid to keep
+ * it in reach, which is where the overlap and the half-hidden buttons came
+ * from. The second made everything fit one screen by taking the difference out
+ * of the board, which left the puzzle too small to enjoy. The overlap was never
+ * the price of a full-width board — it was the price of the sticky keypad, and
+ * that is gone.
+ *
+ * What is on screen when you arrive is the board, the keypad and the controls;
+ * pause and a fresh puzzle are a short scroll below, which is the right order
+ * for how often each is touched.
  */
-@media (max-width: 600px) and (orientation: portrait) {
+@media (max-width: 860px) and (orientation: portrait) {
   /*
-   * Full width, edge to edge. The height term is only a guard for viewports
-   * close to square, where a board as wide as the device would be taller than
-   * the screen; on a phone it never bites.
+   * The full width of whatever it is sitting in. The cap only exists so a
+   * tablet held upright does not get a grid the size of a dinner plate; on a
+   * phone it never bites.
    */
   .board__frame {
-    --board-avail: min(100%, 100dvh - 132px);
+    --board-avail: min(100%, 620px);
   }
+}
 
+@media (max-width: 600px) and (orientation: portrait) {
   /*
    * The keypad is still the instrument you play, so it keeps its two rows of
    * thumb-sized keys — it just spends no more height than it has to.
@@ -1018,11 +1033,55 @@
     grid-area: aside;
   }
 
+  /*
+   * Sideways the console has width to spare and no height at all, so it spends
+   * the one it has: nine keys on a single row and the four controls beside each
+   * other. Stacking them into two rows each was costing a hundred pixels the
+   * column did not have, and pushed the last row off the bottom.
+   */
   .pad {
-    --pad-cols: 5;
+    --pad-cols: 9;
+  }
+
+  .pad__key {
+    min-height: 46px;
   }
 
   .controls {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .controls__button {
+    min-height: 44px;
+  }
+
+  /*
+   * Pause and a fresh puzzle drop the card here for the same reason they do on
+   * a phone held upright: they are one more row of controls, and a card around
+   * them costs padding the column cannot spare.
+   */
+  .game .game__actions {
+    flex-direction: row;
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+  }
+
+  .game .game__actions::before {
+    display: none;
+  }
+
+  .game .game__actions .button {
+    flex: 1 1 0;
+    min-height: 40px;
+    padding: 0 var(--space-2);
+  }
+}
+
+/* Sideways on a touch device: the shortcut list names keys that are not there. */
+@media (max-height: 560px) and (orientation: landscape) and (pointer: coarse) {
+  .game__keyboard-help {
+    display: none;
   }
 }

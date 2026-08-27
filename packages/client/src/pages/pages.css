@@ -1,5 +1,13 @@
 /* Page level chrome shared by home, challenge and techniques. */
 
+/*
+ * Loading a puzzle and failing to load one are both already the solo mode, so
+ * the retry slab arrives in the colour the board it is fetching will have.
+ */
+.page--solo {
+  --accent: var(--aqua);
+}
+
 .home__hero {
   position: relative;
   padding: var(--space-6) 0 var(--space-3);
@@ -11,7 +19,7 @@
   font-size: clamp(2.6rem, 12vw, 3.6rem);
   font-weight: 800;
   letter-spacing: -0.035em;
-  color: var(--bone);
+  color: var(--text);
   /* The name sits under the same light as the keypad below it. */
   text-shadow: 0 0 24px color-mix(in srgb, var(--neon) 34%, transparent);
 }
@@ -22,7 +30,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--accent) 70%, var(--bone));
+  color: color-mix(in srgb, var(--accent) 70%, var(--text));
 }
 
 .language {
@@ -50,11 +58,66 @@
 
 .language__option[aria-pressed='true'] {
   background: color-mix(in srgb, var(--accent) 24%, transparent);
-  color: var(--bone);
+  color: var(--text);
 }
 
-.badge--status {
+.link {
   align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--room) 40%, var(--surface));
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+/* Nothing to report: the pill holds its place so the page never jumps. */
+.link--quiet {
+  visibility: hidden;
+}
+
+.link__lamp {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.link--connecting .link__lamp {
+  animation: link-breathe 1.4s ease-in-out infinite;
+}
+
+/* A dropped link is a lamp that went out, not an alarm. */
+.link--closed {
+  color: color-mix(in srgb, var(--text-muted) 72%, var(--room));
+}
+
+.link--closed .link__lamp {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+@keyframes link-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link--connecting .link__lamp {
+    animation: none;
+    opacity: 0.6;
+  }
 }
 
 .notice {

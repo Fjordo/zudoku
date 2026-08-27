@@ -13,6 +13,7 @@ import { GameScreen } from '../../sudoku/components/GameScreen';
 import { filledCount } from '../../sudoku/gameState';
 import { useSudokuGame } from '../../sudoku/useSudokuGame';
 import type { ChallengeApi } from '../useChallengeRoom';
+import { LinkLost } from './LinkLost';
 import { Scoreboard } from './Scoreboard';
 
 interface ChallengeGameProps {
@@ -80,16 +81,21 @@ export function ChallengeGame({
     ) : null;
 
   return (
-    <GameScreen
-      game={game}
-      difficulty={room.difficulty}
-      elapsedMs={elapsedMs}
-      title={t('game.room', { code: room.code })}
-      onExit={onExit}
-      locked={!racing}
-      overlay={overlay}
-      aside={<Scoreboard room={room} playerId={playerId} />}
-    />
+    <>
+      <GameScreen
+        mode="challenge"
+        game={game}
+        difficulty={room.difficulty}
+        elapsedMs={elapsedMs}
+        title={t('game.room', { code: room.code })}
+        onExit={onExit}
+        locked={!racing}
+        overlay={overlay}
+        aside={<Scoreboard room={room} playerId={playerId} />}
+      />
+      {/* Only while the race is on: a dropped link after the finish costs nothing. */}
+      {racing && <LinkLost status={challenge.status} onLeave={onExit} />}
+    </>
   );
 }
 

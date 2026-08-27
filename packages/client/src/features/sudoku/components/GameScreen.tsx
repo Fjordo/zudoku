@@ -14,6 +14,8 @@ import '../sudoku.css';
 
 interface GameScreenProps {
   game: SudokuGameApi;
+  /** Which mode this board belongs to; it colours the screen's chrome. */
+  mode: 'solo' | 'challenge';
   difficulty: Difficulty;
   elapsedMs: number;
   title: string;
@@ -28,6 +30,7 @@ interface GameScreenProps {
 
 export function GameScreen({
   game,
+  mode,
   difficulty,
   elapsedMs,
   title,
@@ -43,8 +46,16 @@ export function GameScreen({
 
   useBoardKeyboard(game, !disabled && !guideOpen);
 
+  const pageClass = [
+    'page page--wide game',
+    `game--${mode}`,
+    state.hint && 'game--hinted',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div className={state.hint ? 'page page--wide game game--hinted' : 'page page--wide game'}>
+    <div className={pageClass}>
       <header className="topbar">
         <button type="button" className="button button--ghost" onClick={onExit}>
           {t('common.back')}

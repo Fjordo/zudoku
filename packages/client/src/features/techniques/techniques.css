@@ -20,7 +20,7 @@
   font-size: clamp(1.8rem, 8vw, 2.4rem);
   font-weight: 800;
   letter-spacing: -0.03em;
-  color: var(--bone);
+  color: var(--text);
   text-wrap: balance;
 }
 
@@ -103,7 +103,7 @@
   display: block;
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--bone);
+  color: var(--text);
   margin-bottom: 2px;
 }
 
@@ -120,11 +120,11 @@
  * one: the same colour, turned up a step at a time.
  */
 .techniques__band--basic {
-  --accent: color-mix(in srgb, var(--neon) 45%, var(--bone));
+  --accent: color-mix(in srgb, var(--neon) 45%, var(--text));
 }
 
 .techniques__band--intermediate {
-  --accent: color-mix(in srgb, var(--neon) 75%, var(--bone));
+  --accent: color-mix(in srgb, var(--neon) 75%, var(--text));
 }
 
 .techniques__band--advanced {
@@ -172,7 +172,7 @@
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--bone);
+  color: var(--text);
 }
 
 .technique__toggle {
@@ -187,7 +187,7 @@
   font-family: var(--font-mono);
   font-size: 0.9rem;
   line-height: 1;
-  color: color-mix(in srgb, var(--accent) 80%, var(--bone));
+  color: color-mix(in srgb, var(--accent) 80%, var(--text));
 }
 
 .technique__summary {
@@ -251,7 +251,7 @@
   font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--bone);
+  color: var(--text);
 }
 
 .technique__gain {
@@ -306,7 +306,7 @@
 }
 
 .diagram__ruler--lit {
-  color: color-mix(in srgb, var(--neon) 85%, var(--bone));
+  color: color-mix(in srgb, var(--neon) 85%, var(--text));
   font-weight: 700;
 }
 
@@ -345,7 +345,7 @@
 
 /* Blue is the plate talking, and here it points at what it can rule out. */
 .diagram__cell--target {
-  background: color-mix(in srgb, var(--blue-light) 30%, var(--porcelain));
+  background: color-mix(in srgb, var(--violet-light) 30%, var(--porcelain));
 }
 
 /* Supporting digits are ringed, not filled: they explain, they are not the point. */
@@ -374,7 +374,7 @@
   color: color-mix(in srgb, var(--graphite) 45%, var(--porcelain));
   font-weight: 500;
   text-decoration: line-through;
-  text-decoration-color: var(--blue);
+  text-decoration-color: var(--violet);
   text-decoration-thickness: 0.1em;
 }
 
@@ -404,7 +404,7 @@
 .diagram__note--cut {
   color: color-mix(in srgb, var(--graphite) 42%, var(--porcelain));
   text-decoration: line-through;
-  text-decoration-color: var(--blue);
+  text-decoration-color: var(--violet);
   text-decoration-thickness: 0.12em;
 }
 
@@ -451,7 +451,7 @@
 }
 
 .diagram__swatch--target {
-  background: color-mix(in srgb, var(--blue-light) 46%, var(--porcelain));
+  background: color-mix(in srgb, var(--violet-light) 46%, var(--porcelain));
   border-color: transparent;
 }
 
@@ -469,8 +469,8 @@
   background: linear-gradient(
     to bottom right,
     transparent calc(50% - 1px),
-    var(--blue) calc(50% - 1px),
-    var(--blue) calc(50% + 1px),
+    var(--violet) calc(50% - 1px),
+    var(--violet) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }

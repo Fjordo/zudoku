@@ -18,6 +18,7 @@ function Harness() {
         Lock
       </button>
       <GameScreen
+        mode="solo"
         game={game}
         difficulty="easy"
         elapsedMs={0}

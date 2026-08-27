@@ -54,7 +54,7 @@ export function ChallengePage({ code, navigate }: ChallengePageProps) {
         <LanguageSwitcher />
       </header>
 
-      <p className="badge badge--status">{t(connectionKey(status))}</p>
+      <LinkStatus status={status} />
 
       {error && (
         <div className="notice" role="alert">
@@ -91,15 +91,23 @@ export function ChallengePage({ code, navigate }: ChallengePageProps) {
   );
 }
 
-const connectionKey = (status: ConnectionStatus): MessageKey => {
-  switch (status) {
-    case 'open':
-      return 'challenge.connectionOpen';
-    case 'connecting':
-      return 'challenge.connectionConnecting';
-    case 'closed':
-      return 'challenge.connectionClosed';
-    default:
-      return 'challenge.connectionIdle';
-  }
-};
+/**
+ * The lamp only speaks when the link is not doing its job: an idle socket
+ * (nothing joined yet) and a healthy one both look like silence.
+ */
+function LinkStatus({ status }: { status: ConnectionStatus }) {
+  const { t } = useI18n();
+  const key: MessageKey | null =
+    status === 'connecting' ? 'challenge.linkConnecting' : status === 'closed' ? 'challenge.linkLost' : null;
+
+  return (
+    <p className={key ? `link link--${status}` : 'link link--quiet'} role="status" aria-live="polite">
+      {key && (
+        <>
+          <span className="link__lamp" aria-hidden="true" />
+          {t(key)}
+        </>
+      )}
+    </p>
+  );
+}

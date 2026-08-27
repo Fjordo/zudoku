@@ -18,12 +18,22 @@ export function Scoreboard({ room, playerId }: ScoreboardProps) {
       <h2 className="section-title">{t('challenge.standings')}</h2>
       <ul className="players">
         {players.map((player) => (
-          <li key={player.id} className="players__row players__row--stacked">
+          <li
+            key={player.id}
+            className={
+              player.connected
+                ? 'players__row players__row--stacked'
+                : 'players__row players__row--stacked players__row--away'
+            }
+          >
             <div className="players__line">
               <span className="players__name">
                 {player.name}
                 {player.id === playerId && <span className="badge">{t('common.you')}</span>}
                 {room.winnerId === player.id && <span className="badge badge--win">{t('challenge.winner')}</span>}
+                {!player.connected && player.status === 'playing' && (
+                  <span className="badge">{t('challenge.disconnected')}</span>
+                )}
               </span>
               <span className="small tabular">{describe(player, t)}</span>
             </div>
@@ -45,7 +55,6 @@ function describe(player: PlayerSnapshot, t: I18n['t']): string {
     return t('challenge.rank', { rank: player.rank ?? 1, time: formatDuration(player.finishTimeMs) });
   }
   if (player.status === 'eliminated') return t('challenge.out');
-  if (!player.connected) return t('challenge.offline');
   return t('challenge.progress', { filled: player.filledCells, mistakes: player.mistakes });
 }
 

@@ -91,6 +91,7 @@ export function SoloGame({
 
   return (
     <GameScreen
+      mode="solo"
       game={game}
       difficulty={difficulty}
       elapsedMs={elapsedMs}
