@@ -627,39 +627,35 @@
  * across a row of nine you could not tell at a glance which one you were
  * holding. So it changes colour instead, and changes it completely.
  *
- * It goes down rather than up: a deep blue face — the bottom stop is literally
- * this blue mixed into the room, so the key belongs to the page and not to the
- * console — with light type, a bright rim and a blue halo around it. Eight keys
- * stand proud and lit, one is pressed into the board, and it is lit in exactly
- * the colour every cell holding that digit has just turned.
+ * It becomes the aqua slab: the exact face of the button that started the game,
+ * cut down to a keycap. Eight fuchsia keys and one aqua one, in the colour every
+ * cell holding that digit has just turned — and both light faces take the app's
+ * one ink, so the digit and its count never change weight when the key flips.
  */
 .pad__key[aria-pressed='true'] {
-  border-color: color-mix(in srgb, var(--aqua) 70%, transparent);
+  border-color: color-mix(in srgb, var(--graphite) 28%, transparent);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--aqua) 26%, var(--aqua-ink)),
-    color-mix(in srgb, var(--aqua-ink) 84%, var(--room))
+    color-mix(in srgb, var(--aqua) 84%, #ffffff),
+    var(--aqua)
   );
-  color: var(--porcelain);
+  color: var(--graphite);
   box-shadow:
-    0 0 26px color-mix(in srgb, var(--aqua) 42%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 24%, transparent);
-}
-
-.pad__key[aria-pressed='true'] .pad__count {
-  color: color-mix(in srgb, var(--porcelain) 82%, transparent);
+    0 0 22px color-mix(in srgb, var(--aqua) 30%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent);
 }
 
 /* Hover must not repaint the key you are already holding. */
 .pad__key[aria-pressed='true']:hover:not(:disabled) {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--aqua) 38%, var(--aqua-ink)),
-    var(--aqua-ink)
+    color-mix(in srgb, var(--aqua) 68%, #ffffff),
+    color-mix(in srgb, var(--aqua) 94%, #ffffff)
   );
+  border-color: color-mix(in srgb, var(--graphite) 34%, transparent);
   box-shadow:
-    0 0 32px color-mix(in srgb, var(--aqua) 56%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #ffffff 32%, transparent);
+    0 0 30px color-mix(in srgb, var(--aqua) 42%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 42%, transparent);
 }
 
 /* A finished or paused game must read as unavailable, not just be inert. */
