@@ -13,7 +13,7 @@
   "dependencies": {
     "@zudoku/shared": "*",
     "express": "^5.1.0",
-    "ws": "^8.18.3"
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
